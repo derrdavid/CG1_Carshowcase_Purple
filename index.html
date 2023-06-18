@@ -2,17 +2,14 @@
 <html>
 
 <head>
-    <title>WebGL - Cube</title>
+    <title>CG1_Purple</title>
 </head>
 
 <body onload='InitDemo();'>
-    <canvas id='surface' height="720" , width="1080">
+    <canvas id='surface' height="600" , width="800">
         no support
     </canvas>
     <br />
-    <i>
-        Hier sieht man unser Basisprogramm mit Gauraud-Shader.
-    </i>
 
     <img id="skybox-back" src="../assets/skybox/back.jpg" width="0" height="0"></img>
     <img id="skybox-bottom" src="../assets/skybox/bottom.jpg" width="0" height="0"></img>
@@ -26,6 +23,7 @@
     <script type="x-shader/x-fragment" src="./shaders/skybox/fragmentSkybox.glsl"></script>
     <script type="x-shader/x-fragment" src="./shaders/skybox/vertexSkybox.glsl"></script>
 
+    <script type="module" src="libraries/gl-matrix.js"></script>
     <script src="app.js"></script>
     <script type="text/javascript" src="libraries/utils.js"></script>
     <script src="libraries/matrixOp.js"></script>

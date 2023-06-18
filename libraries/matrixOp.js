@@ -258,4 +258,52 @@ class matrixOp {
     static toRadian(a) {
         return a * Math.PI / 180;
     }
+    static getTranslation(out, mat) {
+        out[0] = mat[12];
+        out[1] = mat[13];
+        out[2] = mat[14];
+        return out;
+    }
+    static fromTranslation(out, v) {
+        out[0] = 1;
+        out[1] = 0;
+        out[2] = 0;
+        out[3] = 1;
+        out[4] = v[0];
+        out[5] = v[1];
+        return out;
+    }
+    static fromValues(x, y, z) {
+        var out = new Array;
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+        return out;
+    }
+    static create() {
+        var out = new Array;
+
+        out[0] = 0;
+        out[1] = 0;
+        out[2] = 0;
+
+        return out;
+    }
+    static rotateY(out, a, b, rad) {
+        var p = [],
+            r = []; //Translate point to the origin
+
+        p[0] = a[0] - b[0];
+        p[1] = a[1] - b[1];
+        p[2] = a[2] - b[2]; //perform rotation
+
+        r[0] = p[2] * Math.sin(rad) + p[0] * Math.cos(rad);
+        r[1] = p[1];
+        r[2] = p[2] * Math.cos(rad) - p[0] * Math.sin(rad); //translate to correct position
+
+        out[0] = r[0] + b[0];
+        out[1] = r[1] + b[1];
+        out[2] = r[2] + b[2];
+        return out;
+    }
 };
