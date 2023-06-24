@@ -1,4 +1,13 @@
-async function parseOBJ(location) {
+export function getGlContext(canvas) {
+    const gl = canvas.getContext('webgl');
+    if (!gl) {
+        gl = canvas.getContext('experimental-webgl');
+        alert('your browser does not support WebGl');
+    }
+	return gl;
+}
+
+export async function parseOBJ(location) {
 	// fetch is explained at https://www.youtube.com/watch?v=tc8DU14qX6I.
 	let response = await fetch(location);
 	let txt = await response.text();
@@ -38,7 +47,9 @@ async function loadShader(path) {
 }
 
 // Erstellt ein Shader-Programm mit den angegebenen Vertex- und Fragment-Shadern und gibt es zurück.
-function createShaderProgram(gl, vertexShaderText, fragmentShaderText) {
+export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPath) {
+	const vertexShaderText = await loadShader(vertexShaderPath);
+	const fragmentShaderText = await loadShader(fragmentShaderPath);
 	var program = gl.createProgram();
 	let vertexShader = gl.createShader(gl.VERTEX_SHADER);
 	let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -72,82 +83,8 @@ function createShaderProgram(gl, vertexShaderText, fragmentShaderText) {
 
 	return program;
 };
-
-// Generiert ein 3D-Würfelobjekt mit den definierten Eckpunkten (Vertices) und Indizes (Indices) und gibt es zurück.
-function generateCube() {
-	var boxVertices =
-		[ // X, Y, Z            U, V
-			// Top
-			-1.0, 1.0, -1.0, 0, 0,
-			-1.0, 1.0, 1.0, 0, 1,
-			1.0, 1.0, 1.0, 1, 1,
-			1.0, 1.0, -1.0, 1, 0,
-
-			// Left
-			-1.0, 1.0, 1.0, 0, 0,
-			-1.0, -1.0, 1.0, 1, 0,
-			-1.0, -1.0, -1.0, 1, 1,
-			-1.0, 1.0, -1.0, 0, 1,
-
-			// Right
-			1.0, 1.0, 1.0, 1, 1,
-			1.0, -1.0, 1.0, 0, 1,
-			1.0, -1.0, -1.0, 0, 0,
-			1.0, 1.0, -1.0, 1, 0,
-
-			// Front
-			1.0, 1.0, 1.0, 1, 1,
-			1.0, -1.0, 1.0, 1, 0,
-			-1.0, -1.0, 1.0, 0, 0,
-			-1.0, 1.0, 1.0, 0, 1,
-
-			// Back
-			1.0, 1.0, -1.0, 0, 0,
-			1.0, -1.0, -1.0, 0, 1,
-			-1.0, -1.0, -1.0, 1, 1,
-			-1.0, 1.0, -1.0, 1, 0,
-
-			// Bottom
-			-1.0, -1.0, -1.0, 1, 1,
-			-1.0, -1.0, 1.0, 1, 0,
-			1.0, -1.0, 1.0, 0, 0,
-			1.0, -1.0, -1.0, 0, 1,
-		];
-
-	var boxIndices =
-		[
-			// Top
-			0, 1, 2,
-			0, 2, 3,
-
-			// Left
-			5, 4, 6,
-			6, 4, 7,
-
-			// Right
-			8, 9, 10,
-			8, 10, 11,
-
-			// Front
-			13, 12, 14,
-			15, 14, 12,
-
-			// Back
-			16, 17, 18,
-			16, 18, 19,
-
-			// Bottom
-			21, 20, 22,
-			22, 20, 23
-		];
-	return {
-		vertices: boxVertices,
-		indices: boxIndices
-	};
-}
-
-// Holt die Referenzen auf die Skybox-Bilder und gibt sie als Array zurück.
-function getSkyboxImages() {
+// Holt die Referenzen auf die Skyskybox-Bilder und gibt sie als Array zurück.
+export function getSkyboxImages() {
 	var skyboxTextures = [];
 	skyboxTextures.push(document.getElementById("skybox-right"));
 	skyboxTextures.push(document.getElementById("skybox-left"));
@@ -158,8 +95,8 @@ function getSkyboxImages() {
 	return skyboxTextures;
 }
 
-// Generiert eine Skybox-Textur im Grafikspeicher aus einem Array von Bildern und gibt die Textur zurück.
-function generateSkybox(gl, imgArray) {
+// Generiert eine Skyskybox-Textur im Grafikspeicher aus einem Array von Bildern und gibt die Textur zurück.
+export async function generateSkyboxTexture(gl, imgArray) {
 	const texture = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
 
@@ -175,11 +112,110 @@ function generateSkybox(gl, imgArray) {
 
 	return texture;
 }
+export async function createTeapot(gl) {
+	let teapot = {};
 
-// Funktionen zum Erstellen, Binden und Übertragen von Buffern im Grafikspeicher.
-function createBuffer(gl, target, size, usage) {
-	var bufferObject = gl.createBuffer();
-	gl.bindBuffer(target, bufferObject);
-	gl.bufferData(target, size, usage);
-	return bufferObject;
+	const vertices = await parseOBJ('./assets/teapot.obj');
+
+	teapot.vertexBufferObject = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, teapot.vertexBufferObject);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+	teapot.draw = function() {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
+
+		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
+		gl.vertexAttribPointer(
+			positionAttribLocation, // Attribute location
+			3, // Number of elements per attribute
+			gl.FLOAT, // Type of elements
+			gl.FALSE,
+			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+			0 // Offset from the beginning of a single vertex to this attribute
+		);
+		gl.enableVertexAttribArray(positionAttribLocation);
+
+		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
+		gl.vertexAttribPointer(
+			normalAttribLocation, // Attribute location
+			3, // Number of elements per attribute
+			gl.FLOAT, // Type of elements
+			gl.FALSE,
+			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+			5 * Float32Array.BYTES_PER_ELEMENT // Offset from the beginning of a single vertex to this attribute
+		);
+		gl.enableVertexAttribArray(normalAttribLocation);
+		
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+
+		gl.drawArrays(gl.TRIANGLES, 0, vertices.length/8);
+		
+		gl.disableVertexAttribArray(positionAttribLocation);
+		gl.disableVertexAttribArray(normalAttribLocation);
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+	}
+	return teapot;
+}
+
+export function createSkybox(gl) {
+	var skybox = {};
+
+	var vertices =
+		[
+			-1.0,  1.0, -1.0,  // 0
+			-1.0,  1.0,  1.0,  // 1
+			 1.0,  1.0,  1.0,  // 2
+			 1.0,  1.0, -1.0,  // 3
+			-1.0, -1.0, -1.0,  // 4
+			-1.0, -1.0,  1.0,  // 5
+			 1.0, -1.0,  1.0,  // 6
+			 1.0, -1.0, -1.0,  // 7
+		];
+
+	var indices =
+		[
+			6, 2, 5,   1, 5, 2,   // front
+			0, 1, 2,   0, 2, 3,   // top
+			5, 1, 4,   4, 1, 0,   // left
+			2, 6, 7,   2, 7, 3,   // right
+			3, 7, 4,   3, 4, 0,   // back
+			5, 4, 6,   6, 4, 7    // bottom
+		];
+
+	skybox.vertexBufferObject = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, skybox.vertexBufferObject);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+	skybox.indexBufferObject = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, skybox.indexBufferObject);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+	skybox.draw = function() {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBufferObject);
+	
+		const positionAttribLocation = gl.getAttribLocation(skybox.program, 'vPosition');
+		
+		gl.vertexAttribPointer(
+			positionAttribLocation, // Attribute location
+			3, 
+			gl.FLOAT, 
+			gl.FALSE,
+			3 * Float32Array.BYTES_PER_ELEMENT, 
+			0 
+		);
+		gl.enableVertexAttribArray(positionAttribLocation);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+		
+		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+		//gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+		gl.disableVertexAttribArray(positionAttribLocation);
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+	}
+	return skybox;
 }
