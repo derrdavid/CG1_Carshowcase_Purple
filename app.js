@@ -31,11 +31,14 @@ const lightAmbientUniformLocation = gl.getUniformLocation(phong.program, 'light.
 
 const loop = function () {
 	const angle = performance.now() / 1000 / 6 * 2 * Math.PI;
-	viewMatrix.lookAt([0, 3, 15], [0, 0, 0], [0, 1, 0]);
+	viewMatrix.lookAt([0, 3, 10], [0, 0, 0], [0, 1, 0]);
 	viewMatrix.rotate(angle / 4, [0, -1, 0]);
 
 	gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 	// draw skybox
+	gl.enable(gl.BLEND); // Aktiviert das Mischen von Farben
+	gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); // Definiert die Mischfunktion
+
 	gl.disable(gl.DEPTH_TEST);
 	gl.useProgram(skybox.program);
 
@@ -51,6 +54,8 @@ const loop = function () {
 
 	skybox.draw();
 
+	//gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+	gl.enable(gl.BLEND);
 	gl.enable(gl.DEPTH_TEST);
 	gl.useProgram(teapot.program);
 	const invViewMatrix = new Matrix3;
@@ -75,7 +80,7 @@ const loop = function () {
 	gl.useProgram(phong.program);
 	matProjUniformLocation = gl.getUniformLocation(phong.program, 'mProj');
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
-	viewMatrix.translate(new Vector3(5.0, 0.0, 0.0));
+	viewMatrix.translate(new Vector3(0.0, 0.0, 0.0));
 	matViewUniformLocation = gl.getUniformLocation(phong.program, 'mView');
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
 	matWorldUniformLocation = gl.getUniformLocation(phong.program, 'mWorld');

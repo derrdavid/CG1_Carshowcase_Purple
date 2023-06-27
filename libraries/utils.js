@@ -114,8 +114,16 @@ export async function generateSkyboxTexture(gl, imgArray) {
 }
 export async function createTeapot(gl) {
 	let teapot = {};
-
 	const vertices = await parseOBJ('./assets/teapot.obj');
+
+	var mask = gl.createTexture();
+	gl.activeTexture(gl.TEXTURE0 + 1);
+	gl.bindTexture(gl.TEXTURE_2D, mask);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('mask'));
 
 	teapot.vertexBufferObject = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, teapot.vertexBufferObject);
@@ -124,6 +132,13 @@ export async function createTeapot(gl) {
 
 	teapot.draw = function () {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
+
+		const textureMask = gl.getUniformLocation(this.program, "sampler");
+		gl.uniform1i(textureMask, 1);
+
+		const texAttribLocation = gl.getAttribLocation(this.program, 'vertTexCoord');
+		gl.enableVertexAttribArray(texAttribLocation);
+		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 
 		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
 		gl.vertexAttribPointer(
@@ -153,6 +168,7 @@ export async function createTeapot(gl) {
 
 		gl.disableVertexAttribArray(positionAttribLocation);
 		gl.disableVertexAttribArray(normalAttribLocation);
+		gl.disableVertexAttribArray(texAttribLocation);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 	}
 	return teapot;
@@ -222,8 +238,17 @@ export function createSkybox(gl) {
 
 export async function createPhong(gl) {
 	let teapot = {};
-
 	const vertices = await parseOBJ('./assets/teapot.obj');
+
+
+	var mask = gl.createTexture();
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, mask);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('mask'));
 
 	teapot.vertexBufferObject = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, teapot.vertexBufferObject);
@@ -235,13 +260,19 @@ export async function createPhong(gl) {
 		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
 		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
 		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
+		const textureMask = gl.getUniformLocation(this.program, "sampler");
 
+		gl.uniform1i(textureMask, 0);
 		gl.uniform3f(ambientUniformLocation, 0.23, 0.09, 0.03);
 		gl.uniform3f(diffuseUniformLocation, 0.55, 0.21, 0.07);
 		gl.uniform3f(specularUniformLocation, 0.58, 0.22, 0.07);
 		gl.uniform1f(shininessUniformLocation, 51.2);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
+
+		const texAttribLocation = gl.getAttribLocation(this.program, 'vertTexCoord');
+		gl.enableVertexAttribArray(texAttribLocation);
+		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 
 		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
 		gl.vertexAttribPointer(
@@ -269,6 +300,7 @@ export async function createPhong(gl) {
 
 		gl.disableVertexAttribArray(positionAttribLocation);
 		gl.disableVertexAttribArray(normalAttribLocation);
+		gl.disableVertexAttribArray(texAttribLocation);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 	}
 	return teapot;
