@@ -1,9 +1,9 @@
 export function getGlContext(canvas) {
-    const gl = canvas.getContext('webgl');
-    if (!gl) {
-        gl = canvas.getContext('experimental-webgl');
-        alert('your browser does not support WebGl');
-    }
+	const gl = canvas.getContext('webgl');
+	if (!gl) {
+		gl = canvas.getContext('experimental-webgl');
+		alert('your browser does not support WebGl');
+	}
 	return gl;
 }
 
@@ -122,7 +122,7 @@ export async function createTeapot(gl) {
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-	teapot.draw = function() {
+	teapot.draw = function () {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
 
 		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
@@ -146,11 +146,11 @@ export async function createTeapot(gl) {
 			5 * Float32Array.BYTES_PER_ELEMENT // Offset from the beginning of a single vertex to this attribute
 		);
 		gl.enableVertexAttribArray(normalAttribLocation);
-		
+
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 
-		gl.drawArrays(gl.TRIANGLES, 0, vertices.length/8);
-		
+		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 8);
+
 		gl.disableVertexAttribArray(positionAttribLocation);
 		gl.disableVertexAttribArray(normalAttribLocation);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -163,24 +163,24 @@ export function createSkybox(gl) {
 
 	var vertices =
 		[
-			-1.0,  1.0, -1.0,  // 0
-			-1.0,  1.0,  1.0,  // 1
-			 1.0,  1.0,  1.0,  // 2
-			 1.0,  1.0, -1.0,  // 3
+			-1.0, 1.0, -1.0,  // 0
+			-1.0, 1.0, 1.0,  // 1
+			1.0, 1.0, 1.0,  // 2
+			1.0, 1.0, -1.0,  // 3
 			-1.0, -1.0, -1.0,  // 4
-			-1.0, -1.0,  1.0,  // 5
-			 1.0, -1.0,  1.0,  // 6
-			 1.0, -1.0, -1.0,  // 7
+			-1.0, -1.0, 1.0,  // 5
+			1.0, -1.0, 1.0,  // 6
+			1.0, -1.0, -1.0,  // 7
 		];
 
 	var indices =
 		[
-			6, 2, 5,   1, 5, 2,   // front
-			0, 1, 2,   0, 2, 3,   // top
-			5, 1, 4,   4, 1, 0,   // left
-			2, 6, 7,   2, 7, 3,   // right
-			3, 7, 4,   3, 4, 0,   // back
-			5, 4, 6,   6, 4, 7    // bottom
+			6, 2, 5, 1, 5, 2,   // front
+			0, 1, 2, 0, 2, 3,   // top
+			5, 1, 4, 4, 1, 0,   // left
+			2, 6, 7, 2, 7, 3,   // right
+			3, 7, 4, 3, 4, 0,   // back
+			5, 4, 6, 6, 4, 7    // bottom
 		];
 
 	skybox.vertexBufferObject = gl.createBuffer();
@@ -193,23 +193,23 @@ export function createSkybox(gl) {
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-	skybox.draw = function() {
+	skybox.draw = function () {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBufferObject);
-	
+
 		const positionAttribLocation = gl.getAttribLocation(skybox.program, 'vPosition');
-		
+
 		gl.vertexAttribPointer(
 			positionAttribLocation, // Attribute location
-			3, 
-			gl.FLOAT, 
+			3,
+			gl.FLOAT,
 			gl.FALSE,
-			3 * Float32Array.BYTES_PER_ELEMENT, 
-			0 
+			3 * Float32Array.BYTES_PER_ELEMENT,
+			0
 		);
 		gl.enableVertexAttribArray(positionAttribLocation);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-		
+
 		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 		//gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
@@ -219,3 +219,58 @@ export function createSkybox(gl) {
 	}
 	return skybox;
 }
+
+export async function createPhong(gl) {
+	let teapot = {};
+
+	const vertices = await parseOBJ('./assets/teapot.obj');
+
+	teapot.vertexBufferObject = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, teapot.vertexBufferObject);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+	teapot.draw = function () {
+		const ambientUniformLocation = gl.getUniformLocation(this.program, 'mat.ambient');
+		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
+		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
+		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
+
+		gl.uniform3f(ambientUniformLocation, 0.23, 0.09, 0.03);
+		gl.uniform3f(diffuseUniformLocation, 0.55, 0.21, 0.07);
+		gl.uniform3f(specularUniformLocation, 0.58, 0.22, 0.07);
+		gl.uniform1f(shininessUniformLocation, 51.2);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
+
+		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
+		gl.vertexAttribPointer(
+			positionAttribLocation, // Attribute location
+			3, // Number of elements per attribute
+			gl.FLOAT, // Type of elements
+			gl.FALSE,
+			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+			0 // Offset from the beginning of a single vertex to this attribute
+		);
+		gl.enableVertexAttribArray(positionAttribLocation);
+
+		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
+		gl.vertexAttribPointer(
+			normalAttribLocation, // Attribute location
+			3, // Number of elements per attribute
+			gl.FLOAT, // Type of elements
+			gl.FALSE,
+			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+			5 * Float32Array.BYTES_PER_ELEMENT // Offset from the beginning of a single vertex to this attribute
+		);
+		gl.enableVertexAttribArray(normalAttribLocation);
+
+		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 8);
+
+		gl.disableVertexAttribArray(positionAttribLocation);
+		gl.disableVertexAttribArray(normalAttribLocation);
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+	}
+	return teapot;
+}
+
