@@ -1,6 +1,41 @@
 import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createTeapot, createPhong } from "./libraries/utils.js";
 import { getSkyboxImages } from "./libraries/utils.js";
 import { Matrix3, Matrix4, Vector3, toRadian } from './libraries/matrix.js';
+let lerpedValue = 0.0;
+let targetValue = 0.5;
+let lerpSpeed = 0.001; // Anpassbare Geschwindigkeit des Übergangs
+let maxSpeed = 5;
+document.addEventListener('keydown', function (event) {
+	if (event.keyCode == 37) {
+		// Tastatur nach links gedrückt
+		targetValue -= 0.01;
+
+	} else if (event.keyCode == 39) {
+		// Tastatur nach rechts gedrückt
+		targetValue += 0.01;
+
+	}
+});
+
+function updateLerpedValue() {
+	if (lerpedValue >= maxSpeed) {
+		lerpedValue = maxSpeed;
+	} else if (lerpedValue <= -maxSpeed) {
+		lerpedValue = -maxSpeed;
+	}
+	lerpedValue = lerp(lerpedValue, targetValue, lerpSpeed);
+	// Prüfen, ob der Übergang abgeschlossen ist
+	if (Math.abs(lerpedValue - targetValue) > 0.01) {
+		// Wenn nicht, die Funktion erneut aufrufen
+		requestAnimationFrame(updateLerpedValue);
+
+	}
+}
+function lerp(a, b, t) {
+	return a * (1 - t) + b * t;
+}
+
+// Starten Sie den Update-Prozess für den weichen Übergang
 
 const canvas = document.getElementById('canvas');
 const gl = getGlContext(canvas);
@@ -31,8 +66,9 @@ const lightAmbientUniformLocation = gl.getUniformLocation(phong.program, 'light.
 
 const loop = function () {
 	const angle = performance.now() / 1000 / 6 * 2 * Math.PI;
+	const speed = lerpedValue * angle;
 	viewMatrix.lookAt([0, 3, 10], [0, 0, 0], [0, 1, 0]);
-	viewMatrix.rotate(angle / 4, [0, -1, 0]);
+	viewMatrix.rotate(speed / 8, [0, -1, 0]);
 
 	gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
 	// draw skybox
@@ -63,6 +99,9 @@ const loop = function () {
 	//invViewMatrix.invert();
 	const eyeDir = new Vector3(0.0, 0.0, 1.0);
 	eyeDir.transform(invViewMatrix);
+	viewMatrix.scale([1.5, 1.5, 1.5]);
+	viewMatrix.rotate(angle / 8, [0, 0, 0]);
+
 	let eyeDirUniformLocation = gl.getUniformLocation(teapot.program, 'uEyeDir');
 	gl.uniform3fv(eyeDirUniformLocation, eyeDir);
 
@@ -78,6 +117,7 @@ const loop = function () {
 	teapot.draw();
 
 	gl.useProgram(phong.program);
+
 	matProjUniformLocation = gl.getUniformLocation(phong.program, 'mProj');
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 	viewMatrix.translate(new Vector3(0.0, 0.0, 0.0));
@@ -93,10 +133,11 @@ const loop = function () {
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
 	worldMatrix.identity();
 	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
-
 	phong.draw();
 
 	requestAnimationFrame(loop);
+	updateLerpedValue();
+
 }
 requestAnimationFrame(loop);
 

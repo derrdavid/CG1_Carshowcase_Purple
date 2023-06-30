@@ -263,10 +263,10 @@ export async function createPhong(gl) {
 		const textureMask = gl.getUniformLocation(this.program, "sampler");
 
 		gl.uniform1i(textureMask, 0);
-		gl.uniform3f(ambientUniformLocation, 0.23, 0.09, 0.03);
-		gl.uniform3f(diffuseUniformLocation, 0.55, 0.21, 0.07);
-		gl.uniform3f(specularUniformLocation, 0.58, 0.22, 0.07);
-		gl.uniform1f(shininessUniformLocation, 51.2);
+		gl.uniform3f(ambientUniformLocation, 0.0, 0.0, 1.0);
+		gl.uniform3f(diffuseUniformLocation, 0.1, 0.5, 1.00);
+		gl.uniform3f(specularUniformLocation, 1.0, 1.0, 1.0);
+		gl.uniform1f(shininessUniformLocation, 2.0);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
 

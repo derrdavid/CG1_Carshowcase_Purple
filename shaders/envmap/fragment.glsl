@@ -12,8 +12,9 @@ void main() {
   vec3 normalDir = normalize(fNormal);
   vec3 reflection = textureCube(skybox, reflect(-eyeDir, normalDir)).rgb;
 
-  if(length(texture.rgb) < 0.5) {
+  if(length(texture.rgb) >= 0.5) {
     discard;
   }
-  gl_FragColor = vec4(reflection, 1.0) * texture;
+  gl_FragColor = vec4(reflection, 1.0) * vec4(1.0 - texture.r, 1.0 - texture.g, 1.0 - texture.b, 1.0);
+  ;
 }
