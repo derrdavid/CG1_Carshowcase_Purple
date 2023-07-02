@@ -12,9 +12,9 @@ export class Vector3 extends Float32Array {
 
 	transform(m) {
 		const c = Float32Array.from(this);
-		this[0] = m[0]*c[0] + m[3]*c[1] + m[6]*c[2];
-		this[1] = m[1]*c[0] + m[4]*c[1] + m[7]*c[2];
-		this[2] = m[2]*c[0] + m[5]*c[1] + m[8]*c[2];
+		this[0] = m[0] * c[0] + m[3] * c[1] + m[6] * c[2];
+		this[1] = m[1] * c[0] + m[4] * c[1] + m[7] * c[2];
+		this[2] = m[2] * c[0] + m[5] * c[1] + m[8] * c[2];
 	}
 
 }
@@ -50,48 +50,48 @@ export class Matrix3 extends Float32Array {
 
 	invert() {
 		const m = Float32Array.from(this);
-		const det = m[0]*m[4]*m[8] - m[0]*m[7]*m[5] - m[3]*m[1]*m[8] + m[3]*m[7]*m[2] + m[6]*m[1]*m[5] - m[6]*m[4]*m[2];
-		this[0] = (m[4]*m[8] - m[7]*m[5])/det;
-		this[1] = (m[7]*m[2] - m[1]*m[8])/det;
-		this[2] = (m[1]*m[5] - m[4]*m[2])/det;
-		this[3] = (m[6]*m[5] - m[3]*m[8])/det;
-		this[4] = (m[0]*m[8] - m[6]*m[2])/det;
-		this[5] = (m[3]*m[2] - m[0]*m[5])/det;
-		this[6] = (m[3]*m[7] - m[6]*m[4])/det;
-		this[7] = (m[6]*m[1] - m[0]*m[7])/det;
-		this[8] = (m[0]*m[4] - m[3]*m[1])/det;
+		const det = m[0] * m[4] * m[8] - m[0] * m[7] * m[5] - m[3] * m[1] * m[8] + m[3] * m[7] * m[2] + m[6] * m[1] * m[5] - m[6] * m[4] * m[2];
+		this[0] = (m[4] * m[8] - m[7] * m[5]) / det;
+		this[1] = (m[7] * m[2] - m[1] * m[8]) / det;
+		this[2] = (m[1] * m[5] - m[4] * m[2]) / det;
+		this[3] = (m[6] * m[5] - m[3] * m[8]) / det;
+		this[4] = (m[0] * m[8] - m[6] * m[2]) / det;
+		this[5] = (m[3] * m[2] - m[0] * m[5]) / det;
+		this[6] = (m[3] * m[7] - m[6] * m[4]) / det;
+		this[7] = (m[6] * m[1] - m[0] * m[7]) / det;
+		this[8] = (m[0] * m[4] - m[3] * m[1]) / det;
 	}
 
 	invertFromMatrix4(m) {
 		// https://mathworld.wolfram.com/MatrixInverse.html
 		// https://mathworld.wolfram.com/Determinant.html
 		// this = inv(m)
-		const det = m[0]*m[5]*m[10] - m[0]*m[9]*m[6] - m[4]*m[1]*m[10] + m[4]*m[9]*m[2] + m[8]*m[1]*m[6] - m[8]*m[5]*m[2];
-		this[0] = (m[5]*m[10] - m[9]*m[6])/det;
-		this[1] = (m[9]*m[2] - m[1]*m[10])/det;
-		this[2] = (m[1]*m[6] - m[5]*m[2])/det;
-		this[3] = (m[8]*m[6] - m[4]*m[10])/det;
-		this[4] = (m[0]*m[10] - m[8]*m[2])/det;
-		this[5] = (m[4]*m[2] - m[0]*m[6])/det;
-		this[6] = (m[4]*m[9] - m[8]*m[5])/det;
-		this[7] = (m[8]*m[1] - m[0]*m[9])/det;
-		this[8] = (m[0]*m[5] - m[4]*m[1])/det;
+		const det = m[0] * m[5] * m[10] - m[0] * m[9] * m[6] - m[4] * m[1] * m[10] + m[4] * m[9] * m[2] + m[8] * m[1] * m[6] - m[8] * m[5] * m[2];
+		this[0] = (m[5] * m[10] - m[9] * m[6]) / det;
+		this[1] = (m[9] * m[2] - m[1] * m[10]) / det;
+		this[2] = (m[1] * m[6] - m[5] * m[2]) / det;
+		this[3] = (m[8] * m[6] - m[4] * m[10]) / det;
+		this[4] = (m[0] * m[10] - m[8] * m[2]) / det;
+		this[5] = (m[4] * m[2] - m[0] * m[6]) / det;
+		this[6] = (m[4] * m[9] - m[8] * m[5]) / det;
+		this[7] = (m[8] * m[1] - m[0] * m[9]) / det;
+		this[8] = (m[0] * m[5] - m[4] * m[1]) / det;
 	}
 
 	normalFromMatrix4(m) {
 		// https://mathworld.wolfram.com/MatrixInverse.html
 		// https://mathworld.wolfram.com/Determinant.html
 		// this = transpose(inv(m))
-		const det = m[0]*m[5]*m[10] - m[0]*m[9]*m[6] - m[4]*m[1]*m[10] + m[4]*m[9]*m[2] + m[8]*m[1]*m[6] - m[8]*m[5]*m[2];
-		this[0] = (m[5]*m[10] - m[9]*m[6])/det;
-		this[3] = (m[9]*m[2] - m[1]*m[10])/det;
-		this[6] = (m[1]*m[6] - m[5]*m[2])/det;
-		this[1] = (m[8]*m[6] - m[4]*m[10])/det;
-		this[4] = (m[0]*m[10] - m[8]*m[2])/det;
-		this[7] = (m[4]*m[2] - m[0]*m[6])/det;
-		this[2] = (m[4]*m[9] - m[8]*m[5])/det;
-		this[5] = (m[8]*m[1] - m[0]*m[9])/det;
-		this[8] = (m[0]*m[5] - m[4]*m[1])/det;
+		const det = m[0] * m[5] * m[10] - m[0] * m[9] * m[6] - m[4] * m[1] * m[10] + m[4] * m[9] * m[2] + m[8] * m[1] * m[6] - m[8] * m[5] * m[2];
+		this[0] = (m[5] * m[10] - m[9] * m[6]) / det;
+		this[3] = (m[9] * m[2] - m[1] * m[10]) / det;
+		this[6] = (m[1] * m[6] - m[5] * m[2]) / det;
+		this[1] = (m[8] * m[6] - m[4] * m[10]) / det;
+		this[4] = (m[0] * m[10] - m[8] * m[2]) / det;
+		this[7] = (m[4] * m[2] - m[0] * m[6]) / det;
+		this[2] = (m[4] * m[9] - m[8] * m[5]) / det;
+		this[5] = (m[8] * m[1] - m[0] * m[9]) / det;
+		this[8] = (m[0] * m[5] - m[4] * m[1]) / det;
 	}
 }
 
@@ -229,8 +229,9 @@ export class Matrix4 extends Float32Array {
 		let [x, y, z] = axis;
 		let len = Math.hypot(x, y, z);
 		if (len < EPSILON) {
-		  return null;
+			return null;
 		}
+
 		len = 1 / len;
 		x *= len;
 		y *= len;
@@ -251,7 +252,7 @@ export class Matrix4 extends Float32Array {
 		const a21 = this[9];
 		const a22 = this[10];
 		const a23 = this[11]; // Construct the elements of the rotation matrix
-	
+
 		const b00 = x * x * t + c;
 		const b01 = y * x * t + z * s;
 		const b02 = z * x * t - y * s;
@@ -261,7 +262,7 @@ export class Matrix4 extends Float32Array {
 		const b20 = x * z * t + y * s;
 		const b21 = y * z * t - x * s;
 		const b22 = z * z * t + c; // Perform rotation-specific matrix multiplication
-	
+
 		this[0] = a00 * b00 + a10 * b01 + a20 * b02;
 		this[1] = a01 * b00 + a11 * b01 + a21 * b02;
 		this[2] = a02 * b00 + a12 * b01 + a22 * b02;
@@ -278,10 +279,10 @@ export class Matrix4 extends Float32Array {
 
 	multiply(a, b) {
 		for (let i = 0; i < 15; i += 4) {
-			this[i+0] = a[0]*b[i] + a[4]*b[i+1] +  a[8]*b[i+2] + a[12]*b[i+3];
-			this[i+1] = a[1]*b[i] + a[5]*b[i+1] +  a[9]*b[i+2] + a[13]*b[i+3];
-			this[i+2] = a[2]*b[i] + a[6]*b[i+1] + a[10]*b[i+2] + a[14]*b[i+3];
-			this[i+3] = a[3]*b[i] + a[7]*b[i+1] + a[11]*b[i+2] + a[15]*b[i+3];
+			this[i + 0] = a[0] * b[i] + a[4] * b[i + 1] + a[8] * b[i + 2] + a[12] * b[i + 3];
+			this[i + 1] = a[1] * b[i] + a[5] * b[i + 1] + a[9] * b[i + 2] + a[13] * b[i + 3];
+			this[i + 2] = a[2] * b[i] + a[6] * b[i + 1] + a[10] * b[i + 2] + a[14] * b[i + 3];
+			this[i + 3] = a[3] * b[i] + a[7] * b[i + 1] + a[11] * b[i + 2] + a[15] * b[i + 3];
 		}
 	}
 
