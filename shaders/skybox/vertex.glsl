@@ -1,15 +1,13 @@
-precision mediump float;
+attribute vec3 vPosition;
+
+varying vec3 fTexCoord;
 
 uniform mat4 mWorld;
 uniform mat4 mView;
 uniform mat4 mProj;
-attribute vec3 vPosition;
-varying vec3 fragTexCoord;
 
-void main()
-{
-  fragTexCoord = vPosition;
-  vec4 viewPos = mView * mWorld * vec4(vPosition, 0.0);
-  viewPos.w = 1.0;
-  gl_Position = mProj * viewPos;
+void main() {
+  fTexCoord = vPosition;
+  vec3 viewPos = (mView * mWorld * vec4(vPosition, 0.0)).xyz;
+  gl_Position = mProj * vec4(viewPos, 1.0);
 }

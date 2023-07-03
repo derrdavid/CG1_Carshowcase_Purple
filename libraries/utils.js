@@ -1,3 +1,36 @@
+// vearbeitet Tastatureingaben von left-und rightArrow
+export class InputHandler {
+	constructor(lerped, target, speed, max) {
+		this.lerpedValue = lerped;
+		this.targetValue = target;
+		this.lerpSpeed = speed;
+		this.maxSpeed = max;
+		document.addEventListener('keydown', (event) => {
+			if (event.keyCode == 37) {
+				// links
+				this.targetValue -= 0.01;
+			} else if (event.keyCode == 39) {
+				// rechts
+				this.targetValue += 0.01;
+			}
+		});
+	}
+	updateLerpedValue() {
+		if (this.lerpedValue >= this.maxSpeed) {
+			this.lerpedValue = this.maxSpeed;
+		} else if (this.lerpedValue <= -this.maxSpeed) {
+			this.lerpedValue = -this.maxSpeed;
+		}
+		this.lerpedValue = this.lerp(this.lerpedValue, this.targetValue, this.lerpSpeed);
+		if (Math.abs(this.lerpedValue - this.targetValue) > 0.01) {
+			requestAnimationFrame(this.updateLerpedValue.bind(this));
+		}
+	}
+	lerp(a, b, t) {
+		return a * (1 - t) + b * t;
+	}
+}
+
 export function getGlContext(canvas) {
 	const gl = canvas.getContext('webgl');
 	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -9,17 +42,16 @@ export function getGlContext(canvas) {
 }
 
 export async function parseOBJ(location) {
-	// fetch is explained at https://www.youtube.com/watch?v=tc8DU14qX6I.
-	let response = await fetch(location);
-	let txt = await response.text();
-	let lines = txt.split(/\r*\n/);
+	const response = await fetch(location);
+	const txt = await response.text();
+	const lines = txt.split(/\r*\n/);
 
-	let v = [];
-	let vt = [];
-	let vn = [];
-	let buffer = [];
+	const v = [];
+	const vt = [];
+	const vn = [];
+	const buffer = [];
 
-	for (let line of lines) {
+	lines.forEach((line) => {
 		let data = line.trim().split(/\s+/);
 		let type = data.shift();
 		if (type == 'v') {
@@ -39,15 +71,16 @@ export async function parseOBJ(location) {
 				vn[idx[2] - 1].forEach((x) => { buffer.push(x) });
 			}
 		}
-	}
+	})
 	return buffer;
-};
+}
 
+// Liest Datei mittels Pfad ein und konvertiert sie in Textform
 async function loadShader(path) {
 	return (await fetch(path)).text();
 }
 
-// Erstellt ein Shader-Programm mit den angegebenen Vertex- und Fragment-Shadern und gibt es zurück.
+// Erstellt ein Shader-Programm mit dem angegebenen Vertex- und Fragment-Shader
 export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPath) {
 	const vertexShaderText = await loadShader(vertexShaderPath);
 	const fragmentShaderText = await loadShader(fragmentShaderPath);
@@ -57,6 +90,7 @@ export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPa
 
 	gl.shaderSource(vertexShader, vertexShaderText);
 	gl.compileShader(vertexShader);
+
 	if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
 		console.error('ERROR compiling vertexShader !', gl.getShaderInfoLog(vertexShader));
 		return;
@@ -84,7 +118,8 @@ export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPa
 
 	return program;
 };
-// Holt die Referenzen auf die Skyskybox-Bilder und gibt sie als Array zurück.
+
+// Holt die Referenzen auf die Skybox-Images und gibt sie als Array zurück.
 export function getSkyboxImages() {
 	var skyboxTextures = [];
 	skyboxTextures.push(document.getElementById("skybox-right"));
@@ -96,7 +131,7 @@ export function getSkyboxImages() {
 	return skyboxTextures;
 }
 
-// Generiert eine Skyskybox-Textur im Grafikspeicher aus einem Array von Bildern und gibt die Textur zurück.
+// Generiert eine Skybox-Textur im Grafikspeicher aus einem Array von Images 
 export async function generateSkyboxTexture(gl, imgArray) {
 	const texture = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
@@ -108,16 +143,15 @@ export async function generateSkyboxTexture(gl, imgArray) {
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
 	gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 
 	return texture;
 }
-export async function createTeapot(gl) {
-	let teapot = {};
+export async function createEnvMap(gl) {
+	let envmap = {};
 	const vertices = await parseOBJ('./assets/teapot.obj');
 
-	var mask = gl.createTexture();
+	let mask = gl.createTexture();
 	gl.activeTexture(gl.TEXTURE0 + 1);
 	gl.bindTexture(gl.TEXTURE_2D, mask);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -126,13 +160,13 @@ export async function createTeapot(gl) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('mask'));
 
-	teapot.vertexBufferObject = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, teapot.vertexBufferObject);
+	envmap.vbo = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, envmap.vbo);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-	teapot.draw = function () {
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
+	envmap.draw = function () {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
 
 		const textureMask = gl.getUniformLocation(this.program, "sampler");
 		gl.uniform1i(textureMask, 1);
@@ -143,27 +177,25 @@ export async function createTeapot(gl) {
 
 		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
 		gl.vertexAttribPointer(
-			positionAttribLocation, // Attribute location
-			3, // Number of elements per attribute
-			gl.FLOAT, // Type of elements
+			positionAttribLocation,
+			3,
+			gl.FLOAT,
 			gl.FALSE,
-			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-			0 // Offset from the beginning of a single vertex to this attribute
+			8 * Float32Array.BYTES_PER_ELEMENT,
+			0
 		);
 		gl.enableVertexAttribArray(positionAttribLocation);
 
 		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
 		gl.vertexAttribPointer(
-			normalAttribLocation, // Attribute location
-			3, // Number of elements per attribute
-			gl.FLOAT, // Type of elements
+			normalAttribLocation,
+			3,
+			gl.FLOAT,
 			gl.FALSE,
-			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-			5 * Float32Array.BYTES_PER_ELEMENT // Offset from the beginning of a single vertex to this attribute
+			8 * Float32Array.BYTES_PER_ELEMENT,
+			5 * Float32Array.BYTES_PER_ELEMENT
 		);
 		gl.enableVertexAttribArray(normalAttribLocation);
-
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 
 		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 8);
 
@@ -171,8 +203,9 @@ export async function createTeapot(gl) {
 		gl.disableVertexAttribArray(normalAttribLocation);
 		gl.disableVertexAttribArray(texAttribLocation);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
 	}
-	return teapot;
+	return envmap;
 }
 
 export function createSkybox(gl) {
@@ -180,42 +213,54 @@ export function createSkybox(gl) {
 
 	var vertices =
 		[
-			-1.0, 1.0, -1.0,  // 0
-			-1.0, 1.0, 1.0,  // 1
-			1.0, 1.0, 1.0,  // 2
-			1.0, 1.0, -1.0,  // 3
-			-1.0, -1.0, -1.0,  // 4
-			-1.0, -1.0, 1.0,  // 5
-			1.0, -1.0, 1.0,  // 6
-			1.0, -1.0, -1.0,  // 7
+			-1.0, -1.0, 1.0,
+			1.0, -1.0, 1.0,
+			1.0, 1.0, 1.0,
+			-1.0, 1.0, 1.0,
+			-1.0, -1.0, -1.0,
+			1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0,
+			-1.0, 1.0, -1.0,
 		];
 
 	var indices =
 		[
-			6, 2, 5, 1, 5, 2,   // front
-			0, 1, 2, 0, 2, 3,   // top
-			5, 1, 4, 4, 1, 0,   // left
-			2, 6, 7, 2, 7, 3,   // right
-			3, 7, 4, 3, 4, 0,   // back
-			5, 4, 6, 6, 4, 7    // bottom
+			// front
+			0, 1, 2,
+			2, 3, 0,
+			// top
+			3, 2, 6,
+			6, 7, 3,
+			// back
+			7, 6, 5,
+			5, 4, 7,
+			// bottom
+			4, 5, 1,
+			1, 0, 4,
+			// left
+			4, 0, 3,
+			3, 7, 4,
+			// right
+			1, 5, 6,
+			6, 2, 1,
 		];
 
-	skybox.vertexBufferObject = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, skybox.vertexBufferObject);
+	skybox.vbo = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, skybox.vbo);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-	skybox.indexBufferObject = gl.createBuffer();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, skybox.indexBufferObject);
+	skybox.ibo = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, skybox.ibo);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
 	skybox.draw = function () {
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBufferObject);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 
 		const positionAttribLocation = gl.getAttribLocation(skybox.program, 'vPosition');
-
 		gl.vertexAttribPointer(
 			positionAttribLocation, // Attribute location
 			3,
@@ -225,10 +270,8 @@ export function createSkybox(gl) {
 			0
 		);
 		gl.enableVertexAttribArray(positionAttribLocation);
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 
 		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-		//gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 		gl.disableVertexAttribArray(positionAttribLocation);
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -241,7 +284,6 @@ export async function createPhong(gl) {
 	let teapot = {};
 	const vertices = await parseOBJ('./assets/teapot.obj');
 
-
 	var mask = gl.createTexture();
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, mask);
@@ -258,89 +300,20 @@ export async function createPhong(gl) {
 
 	teapot.draw = function () {
 		const ambientUniformLocation = gl.getUniformLocation(this.program, 'mat.ambient');
-		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
-		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
-		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
-		const textureMask = gl.getUniformLocation(this.program, "sampler");
-
-		gl.uniform1i(textureMask, 0);
 		gl.uniform3f(ambientUniformLocation, 0.0, 0.0, 1.0);
+		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
 		gl.uniform3f(diffuseUniformLocation, 0.1, 0.5, 1.00);
+		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
 		gl.uniform3f(specularUniformLocation, 1.0, 1.0, 1.0);
+		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
 		gl.uniform1f(shininessUniformLocation, 2.0);
+
+		const textureMask = gl.getUniformLocation(this.program, "sampler");
+		gl.uniform1i(textureMask, 0);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
 
-		const texAttribLocation = gl.getAttribLocation(this.program, 'vertTexCoord');
-		gl.enableVertexAttribArray(texAttribLocation);
-		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
-
-		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
-		gl.vertexAttribPointer(
-			positionAttribLocation, // Attribute location
-			3, // Number of elements per attribute
-			gl.FLOAT, // Type of elements
-			gl.FALSE,
-			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-			0 // Offset from the beginning of a single vertex to this attribute
-		);
-		gl.enableVertexAttribArray(positionAttribLocation);
-
-		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
-		gl.vertexAttribPointer(
-			normalAttribLocation, // Attribute location
-			3, // Number of elements per attribute
-			gl.FLOAT, // Type of elements
-			gl.FALSE,
-			8 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-			5 * Float32Array.BYTES_PER_ELEMENT // Offset from the beginning of a single vertex to this attribute
-		);
-		gl.enableVertexAttribArray(normalAttribLocation);
-
-		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 8);
-
-		gl.disableVertexAttribArray(positionAttribLocation);
-		gl.disableVertexAttribArray(normalAttribLocation);
-		gl.disableVertexAttribArray(texAttribLocation);
-		gl.bindBuffer(gl.ARRAY_BUFFER, null);
-	}
-	return teapot;
-}
-
-export async function createPlane(gl) {
-	let teapot = {};
-	const vertices = await parseOBJ('./assets/cube.obj');
-
-	var mask = gl.createTexture();
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, mask);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('mask'));
-
-	teapot.vertexBufferObject = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, teapot.vertexBufferObject);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-	teapot.draw = function () {
-		const ambientUniformLocation = gl.getUniformLocation(this.program, 'mat.ambient');
-		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
-		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
-		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
-		const textureMask = gl.getUniformLocation(this.program, "sampler");
-
-		gl.uniform1i(textureMask, 0);
-		gl.uniform3f(ambientUniformLocation, 0.0, 0.0, 1.0);
-		gl.uniform3f(diffuseUniformLocation, 0.1, 0.5, 1.00);
-		gl.uniform3f(specularUniformLocation, 1.0, 1.0, 1.0);
-		gl.uniform1f(shininessUniformLocation, 2.0);
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
-
-		const texAttribLocation = gl.getAttribLocation(this.program, 'vertTexCoord');
+		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
 		gl.enableVertexAttribArray(texAttribLocation);
 		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 

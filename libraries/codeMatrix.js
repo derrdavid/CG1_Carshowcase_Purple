@@ -26,7 +26,7 @@ function normalize(v) {
 function dot(a, b) {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
-export class Mat3 {
+export class Code3x3 {
     determinant(matrix) {
         const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = matrix;
         return (
@@ -54,7 +54,7 @@ export class Mat3 {
 }
 
 // Berechnungen in Column-Major-Order für 4x4 Matrizen
-export class Mat4 {
+export class Code4x4 {
     multiply(output, inputA, inputB) {
         for (let i = 0; i < 4; i++) {
             const ai0 = inputA[i], ai1 = inputA[i + 4], ai2 = inputA[i + 8], ai3 = inputA[i + 12];
