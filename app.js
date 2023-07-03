@@ -1,4 +1,4 @@
-import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createEnvMap, createPhong, InputHandler } from "./libraries/utils.js";
+import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createEnvMap, createPhong, InputHandler, createPlane } from "./libraries/utils.js";
 import { getSkyboxImages } from "./libraries/utils.js";
 import { Matrix3, Matrix4, Vector3, toRadian } from './libraries/matrix.js';
 import { Code4x4 } from "./libraries/codeMatrix.js";
@@ -15,18 +15,22 @@ const skybox = await createSkybox(gl);
 skybox.texture = texture;
 skybox.program = await createShaderProgram(gl, './shaders/skybox/vertex.glsl', './shaders/skybox/fragment.glsl');
 
-const teapot = await createEnvMap(gl);
-teapot.texture = texture;
-teapot.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
+const planeEnvMap = await createPlane(gl);
+planeEnvMap.texture = texture;
+planeEnvMap.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
 
-const phong = await createPhong(gl);
-phong.program = await createShaderProgram(gl, './shaders/phong/vertex.glsl', "./shaders/phong/fragment.glsl");
+const carEnvMap = await createEnvMap(gl);
+carEnvMap.texture = texture;
+carEnvMap.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
+
+const carPaint = await createPhong(gl);
+carPaint.program = await createShaderProgram(gl, './shaders/phong/vertex.glsl', "./shaders/phong/fragment.glsl");
 
 // get Locations
 //
-const lightPositionUniformLocation = gl.getUniformLocation(phong.program, 'light.position');
-const lightColorUniformLocation = gl.getUniformLocation(phong.program, 'light.color');
-const lightAmbientUniformLocation = gl.getUniformLocation(phong.program, 'light.ambient');
+const lightPositionUniformLocation = gl.getUniformLocation(carPaint.program, 'light.position');
+const lightColorUniformLocation = gl.getUniformLocation(carPaint.program, 'light.color');
+const lightAmbientUniformLocation = gl.getUniformLocation(carPaint.program, 'light.ambient');
 
 const mat4 = new Code4x4();
 var worldMatrix = new Float32Array(16);
@@ -56,36 +60,37 @@ const loop = function () {
 	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
 
 	skybox.draw();
+
 	// envmap
 	//
 	gl.enable(gl.BLEND);
 	gl.enable(gl.DEPTH_TEST);
-	gl.useProgram(teapot.program);
-
+	gl.useProgram(carEnvMap.program);
+	mat4.translate(viewMatrix, viewMatrix, [-1.5, 0, 0]);
 	mat4.rotate(viewMatrix, viewMatrix, angle / 100, [0.0, 1.0, 0]);
 	const invViewMatrix = new Matrix3;
 	invViewMatrix.invertFromMatrix4(viewMatrix);
 	const eyeDir = new Vector3(0.0, 0.0, 1.0);
 	eyeDir.transform(invViewMatrix);
 
-	matProjUniformLocation = gl.getUniformLocation(teapot.program, 'mProj');
-	matViewUniformLocation = gl.getUniformLocation(teapot.program, 'mView');
-	matWorldUniformLocation = gl.getUniformLocation(teapot.program, 'mWorld');
-	let eyeDirUniformLocation = gl.getUniformLocation(teapot.program, 'uEyeDir');
+	matProjUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mProj');
+	matViewUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mView');
+	matWorldUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mWorld');
+	let eyeDirUniformLocation = gl.getUniformLocation(carEnvMap.program, 'uEyeDir');
 
 	gl.uniform3fv(eyeDirUniformLocation, eyeDir);
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
 	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
 
-	teapot.draw();
+	carEnvMap.draw();
 	// phong
 	//
-	gl.useProgram(phong.program);
+	gl.useProgram(carPaint.program);
 
-	matProjUniformLocation = gl.getUniformLocation(phong.program, 'mProj');
-	matViewUniformLocation = gl.getUniformLocation(phong.program, 'mView');
-	matWorldUniformLocation = gl.getUniformLocation(phong.program, 'mWorld');
+	matProjUniformLocation = gl.getUniformLocation(carPaint.program, 'mProj');
+	matViewUniformLocation = gl.getUniformLocation(carPaint.program, 'mView');
+	matWorldUniformLocation = gl.getUniformLocation(carPaint.program, 'mWorld');
 
 	worldMatrix = mat4.identity(worldMatrix);
 
@@ -100,8 +105,32 @@ const loop = function () {
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
 	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
 
-	phong.draw();
+	carPaint.draw();
 
+	// plane
+	//
+	gl.enable(gl.BLEND);
+	gl.enable(gl.DEPTH_TEST);
+	gl.useProgram(planeEnvMap.program);
+
+	mat4.rotate(viewMatrix, viewMatrix, -45, [0.0, 1.0, 0]);
+	mat4.translate(viewMatrix, viewMatrix, [4, 0, 0]);
+	const planeInvViewMatrix = new Matrix3;
+	planeInvViewMatrix.invertFromMatrix4(viewMatrix);
+	const planeEyeDir = new Vector3(0.0, 0.0, 1.0);
+	planeEyeDir.transform(planeInvViewMatrix);
+
+	matProjUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'mProj');
+	matViewUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'mView');
+	matWorldUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'mWorld');
+	let planeEyeDirUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'uEyeDir');
+
+	gl.uniform3fv(planeEyeDirUniformLocation, planeEyeDir);
+	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
+	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
+	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
+
+	planeEnvMap.draw();
 	requestAnimationFrame(loop);
 	inputHandler.updateLerpedValue();
 }
