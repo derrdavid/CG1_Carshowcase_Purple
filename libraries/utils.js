@@ -6,10 +6,10 @@ export class InputHandler {
 		this.lerpSpeed = speed;
 		this.maxSpeed = max;
 		document.addEventListener('keydown', (event) => {
-			if (event.keyCode == 37) {
+			if (event.keyCode === 37) {
 				// links
 				this.targetValue -= 0.01;
-			} else if (event.keyCode == 39) {
+			} else if (event.keyCode === 39) {
 				// rechts
 				this.targetValue += 0.01;
 			}
@@ -32,7 +32,7 @@ export class InputHandler {
 }
 
 export function getGlContext(canvas) {
-	const gl = canvas.getContext('webgl');
+	let gl = canvas.getContext('webgl');
 	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 	if (!gl) {
 		gl = canvas.getContext('experimental-webgl');
@@ -54,16 +54,16 @@ export async function parseOBJ(location) {
 	lines.forEach((line) => {
 		let data = line.trim().split(/\s+/);
 		let type = data.shift();
-		if (type == 'v') {
+		if (type === 'v') {
 			v.push(data.map(parseFloat));
 		}
-		else if (type == 'vt') {
+		else if (type === 'vt') {
 			vt.push(data.map(parseFloat));
 		}
-		else if (type == 'vn') {
+		else if (type === 'vn') {
 			vn.push(data.map(parseFloat));
 		}
-		else if (type == 'f') {
+		else if (type === 'f') {
 			for (let fp of data) {
 				let idx = fp.split('/').map((x) => { return parseInt(x) });
 				v[idx[0] - 1].forEach((x) => { buffer.push(x) });
@@ -84,7 +84,7 @@ async function loadShader(path) {
 export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPath) {
 	const vertexShaderText = await loadShader(vertexShaderPath);
 	const fragmentShaderText = await loadShader(fragmentShaderPath);
-	var program = gl.createProgram();
+	let program = gl.createProgram();
 	let vertexShader = gl.createShader(gl.VERTEX_SHADER);
 	let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 
@@ -117,11 +117,11 @@ export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPa
 	}
 
 	return program;
-};
+}
 
 // Holt die Referenzen auf die Skybox-Images und gibt sie als Array zurück.
 export function getSkyboxImages() {
-	var skyboxTextures = [];
+	let skyboxTextures = [];
 	skyboxTextures.push(document.getElementById("skybox-right"));
 	skyboxTextures.push(document.getElementById("skybox-left"));
 	skyboxTextures.push(document.getElementById("skybox-top"));

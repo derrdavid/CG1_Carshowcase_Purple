@@ -33,6 +33,42 @@ export class Code3x1 {
         v[2] = m[2] * c[0] + m[5] * c[1] + m[8] * c[2];
     }
 }
+
+/**
+ *  Transforms a point vec3 with m3
+ * @param vec3 Vektor3
+ * @param m3 3x3 Matrix
+ * @returns {[]} Transformed vec3
+ */
+export function transform(vec3, m3) {
+    let out = [];
+    out[0] = m3[0] * vec3[0] + m3[3] * vec3[1] + m3[6] * vec3[2];
+    out[1] = m3[1] * vec3[0] + m3[4] * vec3[1] + m3[7] * vec3[2];
+    out[2] = m3[2] * vec3[0] + m3[5] * vec3[1] + m3[8] * vec3[2];
+    return out;
+}
+
+/**
+ * calculate normal from 4x4 matrix
+ * @param m4
+ * @returns {[]}
+ */
+export function normalFromMatrix4(m4) {
+    let normal = [];
+    const determinant = this.determinant(m4);
+    normal[0] = (m4[5] * m4[10] - m4[9] * m4[6]) / determinant;
+    normal[3] = (m4[9] * m4[2] - m4[1] * m4[10]) / determinant;
+    normal[6] = (m4[1] * m4[6] - m4[5] * m4[2]) / determinant;
+    normal[1] = (m4[8] * m4[6] - m4[4] * m4[10]) / determinant;
+    normal[4] = (m4[0] * m4[10] - m4[8] * m4[2]) / determinant;
+    normal[7] = (m4[4] * m4[2] - m4[0] * m4[6]) / determinant;
+    normal[2] = (m4[4] * m4[9] - m4[8] * m4[5]) / determinant;
+    normal[5] = (m4[8] * m4[1] - m4[0] * m4[9]) / determinant;
+    normal[8] = (m4[0] * m4[5] - m4[4] * m4[1]) / determinant;
+    return normal;
+}
+
+
 export class Code3x3 {
     determinant(input) {
         const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = input;

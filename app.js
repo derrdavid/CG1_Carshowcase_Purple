@@ -126,7 +126,8 @@ const loop = function () {
 	const planeInvViewMatrix = new Matrix3;
 	planeInvViewMatrix.invertFromMatrix4(viewMatrix);
 	const planeEyeDir = new Vector3(0.0, 0.0, 1.0);
-	planeEyeDir.transform(planeInvViewMatrix);
+	//planeEyeDir.transform(planeInvViewMatrix);
+	transform(planeEyeDir,planeInvViewMatrix)
 
 	matProjUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'mProj');
 	matViewUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'mView');
