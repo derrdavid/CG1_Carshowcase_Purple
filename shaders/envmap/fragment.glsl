@@ -1,22 +1,24 @@
 precision mediump float;
 
 uniform samplerCube skybox;
-uniform vec3 uEyeDir;
-
-varying vec3 fNormal;
-varying vec2 fragTexCoord;
 uniform sampler2D sampler;
+
+varying vec3 fN;
+varying vec2 fTexCoord;
+varying vec3 fEyeDir;
 void main() {
-  vec4 texture = texture2D(sampler, fragTexCoord);
-  vec3 eyeDir = normalize(uEyeDir);
-  vec3 normalDir = normalize(fNormal);
-  vec3 reflection = textureCube(skybox, reflect(-eyeDir, normalDir)).rgb;
+  vec4 texture = texture2D(sampler, fTexCoord);
 /**
   if(length(texture.rgb) >= 0.5) {
     discard;
   }
   */
 
-  gl_FragColor = vec4(reflection, 1.0); // * vec4(1.0 - texture.r, 1.0 - texture.g, 1.0 - texture.b, 1.0);
-  ;
+  vec3 V = normalize(fEyeDir);
+  vec3 N = normalize(fN);
+  vec3 R = normalize(reflect(-V, N));
+  vec4 reflection = textureCube(skybox, R);
+
+  vec3 mixedColor = mix(reflection.rgb, texture.rgb, 0.1);
+  gl_FragColor = vec4(mixedColor, 1.0);
 }

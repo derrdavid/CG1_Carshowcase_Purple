@@ -171,7 +171,7 @@ export async function createPlane(gl) {
 		const textureMask = gl.getUniformLocation(this.program, "sampler");
 		gl.uniform1i(textureMask, 1);
 
-		const texAttribLocation = gl.getAttribLocation(this.program, 'vertTexCoord');
+		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
 		gl.enableVertexAttribArray(texAttribLocation);
 		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 
@@ -231,7 +231,7 @@ export async function createEnvMap(gl) {
 		const textureMask = gl.getUniformLocation(this.program, "sampler");
 		gl.uniform1i(textureMask, 1);
 
-		const texAttribLocation = gl.getAttribLocation(this.program, 'vertTexCoord');
+		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
 		gl.enableVertexAttribArray(texAttribLocation);
 		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 
@@ -362,7 +362,7 @@ export async function createPhong(gl) {
 		const ambientUniformLocation = gl.getUniformLocation(this.program, 'mat.ambient');
 		gl.uniform3f(ambientUniformLocation, 0.0, 0.0, 1.0);
 		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
-		gl.uniform3f(diffuseUniformLocation, 0.1, 0.5, 1.00);
+		gl.uniform3f(diffuseUniformLocation, 0.1, 0.5, 1.0);
 		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
 		gl.uniform3f(specularUniformLocation, 1.0, 1.0, 1.0);
 		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
