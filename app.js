@@ -1,7 +1,7 @@
 import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createEnvMap, createPhong, InputHandler, createPlane } from "./libraries/utils.js";
 import { getSkyboxImages } from "./libraries/utils.js";
 import { Matrix3, Matrix4, Vector3, toRadian } from './libraries/matrix.js';
-import { Code4x4 } from "./libraries/codeMatrix.js";
+import {Code4x4, transform} from "./libraries/codeMatrix.js";
 // init Scene
 //
 const canvas = document.getElementById('canvas');
@@ -71,7 +71,8 @@ const loop = function () {
 	const invViewMatrix = new Matrix3;
 	invViewMatrix.invertFromMatrix4(viewMatrix);
 	const eyeDir = new Vector3(0.0, 0.0, 1.0);
-	eyeDir.transform(invViewMatrix);
+	//eyeDir.transform(invViewMatrix);
+	transform(eyeDir,invViewMatrix)
 
 	matProjUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mProj');
 	matViewUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mView');
@@ -118,7 +119,8 @@ const loop = function () {
 	const planeInvViewMatrix = new Matrix3;
 	planeInvViewMatrix.invertFromMatrix4(viewMatrix);
 	const planeEyeDir = new Vector3(0.0, 0.0, 1.0);
-	planeEyeDir.transform(planeInvViewMatrix);
+	//planeEyeDir.transform(planeInvViewMatrix);
+	transform(planeEyeDir,planeInvViewMatrix)
 
 	matProjUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'mProj');
 	matViewUniformLocation = gl.getUniformLocation(planeEnvMap.program, 'mView');
