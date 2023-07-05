@@ -41,11 +41,9 @@ export class Code3x1 {
  * @returns {[]} Transformed vec3
  */
 export function transform(vec3, m3) {
-    let out = [];
-    out[0] = m3[0] * vec3[0] + m3[3] * vec3[1] + m3[6] * vec3[2];
-    out[1] = m3[1] * vec3[0] + m3[4] * vec3[1] + m3[7] * vec3[2];
-    out[2] = m3[2] * vec3[0] + m3[5] * vec3[1] + m3[8] * vec3[2];
-    return out;
+    vec3[0] = m3[0] * vec3[0] + m3[3] * vec3[1] + m3[6] * vec3[2];
+    vec3[1] = m3[1] * vec3[0] + m3[4] * vec3[1] + m3[7] * vec3[2];
+    vec3[2] = m3[2] * vec3[0] + m3[5] * vec3[1] + m3[8] * vec3[2];
 }
 
 /**
@@ -54,18 +52,16 @@ export function transform(vec3, m3) {
  * @returns {[]}
  */
 export function normalFromMatrix4(m4) {
-    let normal = [];
     const determinant = this.determinant(m4);
-    normal[0] = (m4[5] * m4[10] - m4[9] * m4[6]) / determinant;
-    normal[3] = (m4[9] * m4[2] - m4[1] * m4[10]) / determinant;
-    normal[6] = (m4[1] * m4[6] - m4[5] * m4[2]) / determinant;
-    normal[1] = (m4[8] * m4[6] - m4[4] * m4[10]) / determinant;
-    normal[4] = (m4[0] * m4[10] - m4[8] * m4[2]) / determinant;
-    normal[7] = (m4[4] * m4[2] - m4[0] * m4[6]) / determinant;
-    normal[2] = (m4[4] * m4[9] - m4[8] * m4[5]) / determinant;
-    normal[5] = (m4[8] * m4[1] - m4[0] * m4[9]) / determinant;
-    normal[8] = (m4[0] * m4[5] - m4[4] * m4[1]) / determinant;
-    return normal;
+    m4[0] = (m4[5] * m4[10] - m4[9] * m4[6]) / determinant;
+    m4[3] = (m4[9] * m4[2] - m4[1] * m4[10]) / determinant;
+    m4[6] = (m4[1] * m4[6] - m4[5] * m4[2]) / determinant;
+    m4[1] = (m4[8] * m4[6] - m4[4] * m4[10]) / determinant;
+    m4[4] = (m4[0] * m4[10] - m4[8] * m4[2]) / determinant;
+    m4[7] = (m4[4] * m4[2] - m4[0] * m4[6]) / determinant;
+    m4[2] = (m4[4] * m4[9] - m4[8] * m4[5]) / determinant;
+    m4[5] = (m4[8] * m4[1] - m4[0] * m4[9]) / determinant;
+    m4[8] = (m4[0] * m4[5] - m4[4] * m4[1]) / determinant;
 }
 
 
