@@ -4,6 +4,7 @@ struct Light {
   vec3 color;
   vec3 ambient;
 };
+
 struct Material {
   vec3 ambient;
   vec3 diffuse;
