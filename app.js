@@ -14,10 +14,10 @@ const skybox = await createSkybox(gl);
 skybox.texture = texture;
 skybox.program = await createShaderProgram(gl, './shaders/skybox/vertex.glsl', './shaders/skybox/fragment.glsl');
 
-const carEnvMap = await createChromeBody(gl,'./assets/body.obj');
+const carEnvMap = await createChromeBody(gl, './assets/body.obj');
 carEnvMap.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
 
-const tyres = await createTyres(gl,'./assets/tyres.obj');
+const tyres = await createTyres(gl, './assets/tyres.obj');
 tyres.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
 
 const carPaint = await createPhong(gl);
@@ -69,7 +69,7 @@ const loop = function () {
 
 
 	const invViewMatrix = new Float32Array(9);
-	Code3x3.invertFromMatrix4(invViewMatrix, viewMatrix);
+	Code3x3.invertFrom4x4(invViewMatrix, viewMatrix);
 	const eyeDir = [0, 0, 1];
 	Code3x1.multiplyMatrixVector(invViewMatrix, eyeDir);
 

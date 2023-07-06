@@ -68,7 +68,7 @@ export class Code3x3 {
         return output;
     }
 
-    static invertFromMatrix4(output, input) {
+    static invertFrom4x4(output, input) {
         const det = (
             input[0] * input[5] * input[10] -
             input[0] * input[9] * input[6] -
