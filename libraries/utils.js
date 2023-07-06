@@ -388,12 +388,10 @@ export async function createBodyPaint(gl) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 	bodyPaint.draw = function () {
-		const lightPositionUniformLocation = gl.getUniformLocation(bodyPaint.program, "light.position");
+		const lightPositionUniformLocation = gl.getUniformLocation(this.program, "light.position");
 		gl.uniform3f(lightPositionUniformLocation, -2.5, 3.0, -1.0);
-		const lightColorUniformLocation = gl.getUniformLocation(bodyPaint.program, "light.color");
+		const lightColorUniformLocation = gl.getUniformLocation(this.program, "light.color");
 		gl.uniform3f(lightColorUniformLocation, 1.0, 1.0, 1.0);
-		const lightAmbientUniformLocation = gl.getUniformLocation(bodyPaint.program, "light.ambient");
-		gl.uniform3f(lightAmbientUniformLocation, 0.2, 0.2, 0.2);
 		const ambientUniformLocation = gl.getUniformLocation(this.program, "mat.ambient");
 		gl.uniform3f(ambientUniformLocation, 0.0, 0.05, 0.0);
 		const diffuseUniformLocation = gl.getUniformLocation(this.program, "mat.diffuse");
@@ -401,7 +399,7 @@ export async function createBodyPaint(gl) {
 		const specularUniformLocation = gl.getUniformLocation(this.program, "mat.specular");
 		gl.uniform3f(specularUniformLocation, 1.0, 1.0, 1.0);
 		const shininessUniformLocation = gl.getUniformLocation(this.program, "mat.shininess");
-		gl.uniform1f(shininessUniformLocation, 2);
+		gl.uniform1f(shininessUniformLocation, 10);
 		const samplerUniformLocation = gl.getUniformLocation(this.program, "sampler");
 		gl.uniform1i(samplerUniformLocation, 0);
 
