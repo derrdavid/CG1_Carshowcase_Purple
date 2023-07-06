@@ -5,7 +5,7 @@ export class InputHandler {
 		this.targetValue = target;
 		this.lerpSpeed = speed;
 		this.maxSpeed = max;
-		document.addEventListener('keydown', (event) => {
+		document.addEventListener("keydown", (event) => {
 			if (event.keyCode === 37) {
 				// links
 				this.targetValue -= 0.01;
@@ -32,11 +32,11 @@ export class InputHandler {
 }
 
 export function getGlContext(canvas) {
-	let gl = canvas.getContext('webgl');
+	let gl = canvas.getContext("webgl");
 	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 	if (!gl) {
-		gl = canvas.getContext('experimental-webgl');
-		alert('your browser does not support WebGl');
+		gl = canvas.getContext("experimental-webgl");
+		alert("your browser does not support WebGl");
 	}
 	return gl;
 }
@@ -54,22 +54,37 @@ export async function parseOBJ(location) {
 	lines.forEach((line) => {
 		let data = line.trim().split(/\s+/);
 		let type = data.shift();
-		if (type === 'v') {
+		if (type === "v") {
 			v.push(data.map(parseFloat));
 		}
-		else if (type === 'vt') {
+		else if (type === "vt") {
 			vt.push(data.map(parseFloat));
 		}
-		else if (type === 'vn') {
+		else if (type === "vn") {
 			vn.push(data.map(parseFloat));
 		}
-		else if (type === 'f') {
-			data.forEach((fp) => {
-				let idx = fp.split('/').map((x) => { return parseInt(x) });
-				v[idx[0] - 1].forEach((x) => { buffer.push(x) });
-				vt[idx[1] - 1].forEach((x) => { buffer.push(x) });
-				vn[idx[2] - 1].forEach((x) => { buffer.push(x) });
-			})
+		else if (type === "f") {
+			for (let face of data) {
+				let indices = face.split("/").map((x) => {
+					return parseInt(x);
+				});
+
+				let vertexIndices = indices[0] - 1;
+				let textureIndices = indices[1] - 1;
+				let normalIndices = indices[2] - 1;
+
+				v[vertexIndices].forEach((vertex) => {
+					buffer.push(vertex);
+				});
+
+				vt[textureIndices].forEach((texture) => {
+					buffer.push(texture);
+				});
+
+				vn[normalIndices].forEach((normal) => {
+					buffer.push(normal);
+				});
+			}
 		}
 	})
 	return buffer;
@@ -92,26 +107,26 @@ export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPa
 	gl.shaderSource(vertexShader, vertexShaderText);
 	gl.compileShader(vertexShader);
 	if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-		console.error('ERROR compiling vertexShader !', gl.getShaderInfoLog(vertexShader));
+		console.error("ERROR compiling vertexShader !", gl.getShaderInfoLog(vertexShader));
 		return;
 	}
 	gl.shaderSource(fragmentShader, fragmentShaderText);
 	gl.compileShader(fragmentShader);
 	if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-		console.error('ERROR compiling fragmentShader', gl.getShaderInfoLog(fragmentShader));
+		console.error("ERROR compiling fragmentShader", gl.getShaderInfoLog(fragmentShader));
 		return;
 	}
 	gl.attachShader(program, vertexShader);
 	gl.attachShader(program, fragmentShader);
 	gl.linkProgram(program);
 	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-		console.error('ERROR linking program!', gl.getProgramInfoLog(program));
+		console.error("ERROR linking program!", gl.getProgramInfoLog(program));
 		return;
 	}
 
 	gl.validateProgram(program);
 	if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-		console.error('ERROR validating program!', gl.getProgramInfoLog(program));
+		console.error("ERROR validating program!", gl.getProgramInfoLog(program));
 		return;
 	}
 
@@ -148,7 +163,7 @@ export async function generateSkyboxTexture(gl, imgArray) {
 }
 export async function createTyres(gl) {
 	let tyres = {};
-	const vertices = await parseOBJ('./assets/tyres.obj');
+	const vertices = await parseOBJ("./assets/tyres.obj");
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
 	let tyreTexture = gl.createTexture();
@@ -158,7 +173,7 @@ export async function createTyres(gl) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('tyreTexture'));
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById("tyreTexture"));
 
 	tyres.vbo = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, tyres.vbo);
@@ -175,11 +190,11 @@ export async function createTyres(gl) {
 		const windowMaskSampler = gl.getUniformLocation(this.program, "windowMaskSampler");
 		gl.uniform1i(windowMaskSampler, 2);
 
-		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
+		const texAttribLocation = gl.getAttribLocation(this.program, "vTexCoord");
 		gl.enableVertexAttribArray(texAttribLocation);
 		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 
-		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
+		const positionAttribLocation = gl.getAttribLocation(this.program, "vPosition");
 		gl.vertexAttribPointer(
 			positionAttribLocation,
 			3,
@@ -190,7 +205,7 @@ export async function createTyres(gl) {
 		);
 		gl.enableVertexAttribArray(positionAttribLocation);
 
-		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
+		const normalAttribLocation = gl.getAttribLocation(this.program, "vNormal");
 		gl.vertexAttribPointer(
 			normalAttribLocation,
 			3,
@@ -214,7 +229,7 @@ export async function createTyres(gl) {
 
 export async function createChromeBody(gl) {
 	let chromeBody = {};
-	const vertices = await parseOBJ('./assets/body.obj');
+	const vertices = await parseOBJ("./assets/body.obj");
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
 	let bodyTexture = gl.createTexture();
@@ -224,7 +239,7 @@ export async function createChromeBody(gl) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('bodyTexture'));
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById("bodyTexture"));
 
 	let bodyMask = gl.createTexture();
 	gl.activeTexture(gl.TEXTURE0 + 2);
@@ -233,7 +248,7 @@ export async function createChromeBody(gl) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('bodyMask'));
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById("bodyMask"));
 
 	let windowMask = gl.createTexture();
 	gl.activeTexture(gl.TEXTURE0 + 3);
@@ -242,7 +257,7 @@ export async function createChromeBody(gl) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('windowMask'));
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById("windowMask"));
 
 	chromeBody.vbo = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, chromeBody.vbo);
@@ -260,11 +275,11 @@ export async function createChromeBody(gl) {
 		gl.uniform1i(windowSamplerUniformLocation, 3);
 
 
-		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
+		const texAttribLocation = gl.getAttribLocation(this.program, "vTexCoord");
 		gl.enableVertexAttribArray(texAttribLocation);
 		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 
-		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
+		const positionAttribLocation = gl.getAttribLocation(this.program, "vPosition");
 		gl.vertexAttribPointer(
 			positionAttribLocation,
 			3,
@@ -275,7 +290,7 @@ export async function createChromeBody(gl) {
 		);
 		gl.enableVertexAttribArray(positionAttribLocation);
 
-		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
+		const normalAttribLocation = gl.getAttribLocation(this.program, "vNormal");
 		gl.vertexAttribPointer(
 			normalAttribLocation,
 			3,
@@ -349,7 +364,7 @@ export function createSkybox(gl) {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
 
-		const positionAttribLocation = gl.getAttribLocation(skybox.program, 'vPosition');
+		const positionAttribLocation = gl.getAttribLocation(skybox.program, "vPosition");
 		gl.vertexAttribPointer(
 			positionAttribLocation, // Attribute location
 			3,
@@ -371,7 +386,7 @@ export function createSkybox(gl) {
 
 export async function createPhong(gl) {
 	let carPaint = {};
-	const vertices = await parseOBJ('./assets/body.obj');
+	const vertices = await parseOBJ("./assets/body.obj");
 
 	var mask = gl.createTexture();
 	gl.activeTexture(gl.TEXTURE0);
@@ -380,7 +395,7 @@ export async function createPhong(gl) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('bodyMask'));
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById("bodyMask"));
 
 	carPaint.vertexBufferObject = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, carPaint.vertexBufferObject);
@@ -388,19 +403,19 @@ export async function createPhong(gl) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 	carPaint.draw = function () {
-		const lightPositionUniformLocation = gl.getUniformLocation(carPaint.program, 'light.position');
+		const lightPositionUniformLocation = gl.getUniformLocation(carPaint.program, "light.position");
 		gl.uniform3f(lightPositionUniformLocation, -2.5, 3.0, -1.0);
-		const lightColorUniformLocation = gl.getUniformLocation(carPaint.program, 'light.color');
+		const lightColorUniformLocation = gl.getUniformLocation(carPaint.program, "light.color");
 		gl.uniform3f(lightColorUniformLocation, 1.0, 1.0, 1.0);
-		const lightAmbientUniformLocation = gl.getUniformLocation(carPaint.program, 'light.ambient');
+		const lightAmbientUniformLocation = gl.getUniformLocation(carPaint.program, "light.ambient");
 		gl.uniform3f(lightAmbientUniformLocation, 0.2, 0.2, 0.2);
-		const ambientUniformLocation = gl.getUniformLocation(this.program, 'mat.ambient');
+		const ambientUniformLocation = gl.getUniformLocation(this.program, "mat.ambient");
 		gl.uniform3f(ambientUniformLocation, 0.0, 0.05, 0.0);
-		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
+		const diffuseUniformLocation = gl.getUniformLocation(this.program, "mat.diffuse");
 		gl.uniform3f(diffuseUniformLocation, 0.0, 0.05, 0.0);
-		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
+		const specularUniformLocation = gl.getUniformLocation(this.program, "mat.specular");
 		gl.uniform3f(specularUniformLocation, 1.0, 1.0, 1.0);
-		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
+		const shininessUniformLocation = gl.getUniformLocation(this.program, "mat.shininess");
 		gl.uniform1f(shininessUniformLocation, 2);
 
 		const textureMask = gl.getUniformLocation(this.program, "sampler");
@@ -408,11 +423,11 @@ export async function createPhong(gl) {
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBufferObject);
 
-		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
+		const texAttribLocation = gl.getAttribLocation(this.program, "vTexCoord");
 		gl.enableVertexAttribArray(texAttribLocation);
 		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
 
-		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
+		const positionAttribLocation = gl.getAttribLocation(this.program, "vPosition");
 		gl.vertexAttribPointer(
 			positionAttribLocation, // Attribute location
 			3, // Number of elements per attribute
@@ -423,7 +438,7 @@ export async function createPhong(gl) {
 		);
 		gl.enableVertexAttribArray(positionAttribLocation);
 
-		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
+		const normalAttribLocation = gl.getAttribLocation(this.program, "vNormal");
 		gl.vertexAttribPointer(
 			normalAttribLocation, // Attribute location
 			3, // Number of elements per attribute
