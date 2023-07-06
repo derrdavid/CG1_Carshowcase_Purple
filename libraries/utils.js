@@ -161,9 +161,9 @@ export async function generateSkyboxTexture(gl, imgArray) {
 
 	return texture;
 }
-export async function createTyres(gl) {
+export async function createTyres(gl, OBJ_Path) {
 	let tyres = {};
-	const vertices = await parseOBJ("./assets/tyres.obj");
+	const vertices = await parseOBJ(OBJ_Path);
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
 	let tyreTexture = gl.createTexture();
@@ -227,9 +227,9 @@ export async function createTyres(gl) {
 	return tyres;
 }
 
-export async function createChromeBody(gl) {
+export async function createChromeBody(gl, OBJ_Path) {
 	let chromeBody = {};
-	const vertices = await parseOBJ("./assets/body.obj");
+	const vertices = await parseOBJ(OBJ_Path);
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
 	let bodyTexture = gl.createTexture();
