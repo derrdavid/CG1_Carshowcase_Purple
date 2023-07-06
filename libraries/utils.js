@@ -89,13 +89,13 @@ export async function parseOBJ(location) {
 	return buffer;
 }
 
-// Liest Datei mittels Pfad ein und konvertiert sie in Textform
-async function loadShader(path) {
-	return (await fetch(path)).text();
-}
-
 // Erstellt ein Shader-Programm mit dem angegebenen Vertex- und Fragment-Shader
 export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPath) {
+	// Liest Datei mittels Pfad ein und konvertiert sie in Textform
+	async function loadShader(path) {
+		return (await fetch(path)).text();
+	}
+
 	const vertexShaderText = await loadShader(vertexShaderPath);
 	const fragmentShaderText = await loadShader(fragmentShaderPath);
 
@@ -143,7 +143,6 @@ export function getSkyboxImages() {
 	skyboxTextures.push(document.getElementById("skybox-back"));
 	return skyboxTextures;
 }
-
 // Generiert eine Skybox-Textur im Grafikspeicher aus einem Array von Images 
 export async function generateSkyboxTexture(gl, imgArray) {
 	const texture = gl.createTexture();
@@ -160,11 +159,86 @@ export async function generateSkyboxTexture(gl, imgArray) {
 
 	return texture;
 }
+
+export async function createSkybox(gl) {
+	var skybox = {};
+
+	var vertices =
+		[
+			-1.0, -1.0, 1.0,
+			1.0, -1.0, 1.0,
+			1.0, 1.0, 1.0,
+			-1.0, 1.0, 1.0,
+			-1.0, -1.0, -1.0,
+			1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0,
+			-1.0, 1.0, -1.0,
+		];
+
+	var indices =
+		[
+			// front
+			0, 1, 2,
+			2, 3, 0,
+			// top
+			3, 2, 6,
+			6, 7, 3,
+			// back
+			7, 6, 5,
+			5, 4, 7,
+			// bottom
+			4, 5, 1,
+			1, 0, 4,
+			// left
+			4, 0, 3,
+			3, 7, 4,
+			// right
+			1, 5, 6,
+			6, 2, 1,
+		];
+
+	skybox.vbo = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, skybox.vbo);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+	skybox.ibo = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, skybox.ibo);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+	const imgArray = await getSkyboxImages();
+	const texture = await generateSkyboxTexture(gl, imgArray);
+
+	skybox.draw = function () {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+		const positionAttribLocation = gl.getAttribLocation(skybox.program, "vPosition");
+		gl.vertexAttribPointer(
+			positionAttribLocation, // Attribute location
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			3 * Float32Array.BYTES_PER_ELEMENT,
+			0
+		);
+		gl.enableVertexAttribArray(positionAttribLocation);
+
+		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+		gl.disableVertexAttribArray(positionAttribLocation);
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+	}
+	return skybox;
+}
+
 export async function createTyres(gl, OBJ_Path) {
 	let tyres = {};
 	const vertices = await parseOBJ(OBJ_Path);
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-
 	let tyreTexture = gl.createTexture();
 	gl.activeTexture(gl.TEXTURE0 + 4);
 	gl.bindTexture(gl.TEXTURE_2D, tyreTexture);
@@ -225,6 +299,7 @@ export async function createTyres(gl, OBJ_Path) {
 	}
 	return tyres;
 }
+
 
 export async function createChromeBody(gl, OBJ_Path) {
 	let chromeBody = {};
@@ -309,78 +384,6 @@ export async function createChromeBody(gl, OBJ_Path) {
 
 	}
 	return chromeBody;
-}
-
-export function createSkybox(gl) {
-	var skybox = {};
-
-	var vertices =
-		[
-			-1.0, -1.0, 1.0,
-			1.0, -1.0, 1.0,
-			1.0, 1.0, 1.0,
-			-1.0, 1.0, 1.0,
-			-1.0, -1.0, -1.0,
-			1.0, -1.0, -1.0,
-			1.0, 1.0, -1.0,
-			-1.0, 1.0, -1.0,
-		];
-
-	var indices =
-		[
-			// front
-			0, 1, 2,
-			2, 3, 0,
-			// top
-			3, 2, 6,
-			6, 7, 3,
-			// back
-			7, 6, 5,
-			5, 4, 7,
-			// bottom
-			4, 5, 1,
-			1, 0, 4,
-			// left
-			4, 0, 3,
-			3, 7, 4,
-			// right
-			1, 5, 6,
-			6, 2, 1,
-		];
-
-	skybox.vbo = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, skybox.vbo);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-	skybox.ibo = gl.createBuffer();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, skybox.ibo);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-	skybox.draw = function () {
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo);
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
-
-		const positionAttribLocation = gl.getAttribLocation(skybox.program, "vPosition");
-		gl.vertexAttribPointer(
-			positionAttribLocation, // Attribute location
-			3,
-			gl.FLOAT,
-			gl.FALSE,
-			3 * Float32Array.BYTES_PER_ELEMENT,
-			0
-		);
-		gl.enableVertexAttribArray(positionAttribLocation);
-
-		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-
-		gl.disableVertexAttribArray(positionAttribLocation);
-		gl.bindBuffer(gl.ARRAY_BUFFER, null);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-	}
-	return skybox;
 }
 
 export async function createPhong(gl) {

@@ -7,11 +7,7 @@ const canvas = document.getElementById('canvas');
 const gl = getGlContext(canvas);
 const inputHandler = new InputHandler(0.0, 0.5, 0.0005, 5.0);
 
-const imgArray = await getSkyboxImages();
-const texture = await generateSkyboxTexture(gl, imgArray);
-
 const skybox = await createSkybox(gl);
-skybox.texture = texture;
 skybox.program = await createShaderProgram(gl, './shaders/skybox/vertex.glsl', './shaders/skybox/fragment.glsl');
 
 const carEnvMap = await createChromeBody(gl, './assets/body.obj');
