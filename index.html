@@ -5,13 +5,15 @@
     <title>CG1_Purple</title>
     <meta charset="UTF-8">
     <script type="module" src="app.js" defer></script>
+    <script type="text/css" src="style.css"></script>
 </head>
 
 <body style="background-color: #010101;">
-    <canvas id='canvas' style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);" height="800"
-        width="1600">
-        no support
-    </canvas>
+        <canvas id='canvas' style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);" height="800"width="1600">no support</canvas>
+        <div>
+            <label id="label" style="position: absolute; left: 45%;bottom: 10px;width: 100px;right: 50%;color: aliceblue">Press Left and Right Arrow Key to rotate</label>
+        </div>
+
     <img id="skybox-front" src="../assets/skybox/pz.png" width="0" height="0"></img>
     <img id="skybox-bottom" src="../assets/skybox/ny.png" width="0" height="0"></img>
     <img id="skybox-back" src="../assets/skybox/nz.png" width="0" height="0"></img>
