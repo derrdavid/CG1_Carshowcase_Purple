@@ -1,4 +1,4 @@
-import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createEnvMap, createPhong, InputHandler} from "./libraries/utils.js";
+import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createChromeBody, createPhong, InputHandler } from "./libraries/utils.js";
 import { getSkyboxImages } from "./libraries/utils.js";
 import { Code3x1, Code4x4, Code3x3 } from "./libraries/codeMatrix.js";
 // init Scene
@@ -14,7 +14,7 @@ const skybox = await createSkybox(gl);
 skybox.texture = texture;
 skybox.program = await createShaderProgram(gl, './shaders/skybox/vertex.glsl', './shaders/skybox/fragment.glsl');
 
-const carEnvMap = await createEnvMap(gl);
+const carEnvMap = await createChromeBody(gl);
 carEnvMap.texture = texture;
 carEnvMap.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
 
@@ -23,25 +23,19 @@ carPaint.program = await createShaderProgram(gl, './shaders/phong/vertex.glsl', 
 
 // get Locations
 //
-const lightPositionUniformLocation = gl.getUniformLocation(carPaint.program, 'light.position');
-const lightColorUniformLocation = gl.getUniformLocation(carPaint.program, 'light.color');
-const lightAmbientUniformLocation = gl.getUniformLocation(carPaint.program, 'light.ambient');
-const materialPositionUniformLocation = gl.getUniformLocation(carPaint.program, 'mat.position');
-const materialColorUniformLocation = gl.getUniformLocation(carPaint.program, 'mat.color');
-const materialAmbientUniformLocation = gl.getUniformLocation(carPaint.program, 'mat.ambient');
-
 const code4x4 = new Code4x4();
 const code3x1 = new Code3x1();
 const code3x3 = new Code3x3();
+
 var worldMatrix = new Float32Array(16);
 var viewMatrix = new Float32Array(16);
 const projMatrix = new Float32Array(16);
 
-// main render-loop
-//
 code4x4.perspective(projMatrix, 45 * Math.PI / 180, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
 gl.enable(gl.BLEND);
-gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+gl.enable(gl.ALPHA_TEST);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
 const loop = function () {
 	const angle = performance.now() / 1000;
 	const speed = inputHandler.lerpedValue * angle;
@@ -98,10 +92,6 @@ const loop = function () {
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
 	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
-
-	gl.uniform3f(lightPositionUniformLocation, 1.0, 1.0, 0.0);
-	gl.uniform3f(lightColorUniformLocation, 0.5, 0.5, 0.5);
-	gl.uniform3f(lightAmbientUniformLocation, 0.2, 0.2, 0.2);
 
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
 	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
