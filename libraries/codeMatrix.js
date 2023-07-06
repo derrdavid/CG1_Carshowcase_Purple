@@ -36,7 +36,10 @@ export class Code3x1 {
 
 export class Code3x3 {
     static determinant(input) {
-        const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = input;
+        const [
+            m00, m01, m02,
+            m10, m11, m12,
+            m20, m21, m22] = input;
         return (
             m00 * (m11 * m22 - m12 * m21) -
             m01 * (m10 * m22 - m12 * m20) +
@@ -44,7 +47,12 @@ export class Code3x3 {
         );
     }
     static invert(output, input) {
-        const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = input;
+        const [
+            m00, m01, m02,
+            m10, m11, m12,
+            m20, m21, m22
+        ] = input;
+
         const det = this.determinant(input);
         const invDet = 1 / det;
 
@@ -59,31 +67,30 @@ export class Code3x3 {
         output[8] = (m00 * m11 - m01 * m10) * invDet;
         return output;
     }
-    static normalFromMatrix4(output, input) {
-		const det = input[0] * input[5] * input[10] - input[0] * input[9] * input[6] - input[4] * input[1] * input[10] + input[4] * input[9] * input[2] + input[8] * input[1] * input[6] - input[8] * input[5] * input[2];
-        output[0] = (input[5] * input[10] - input[9] * input[6]) / det;
-        output[3] = (input[9] * input[2] - input[1] * input[10]) / det;
-        output[6] = (input[1] * input[6] - input[5] * input[2]) / det;
-        output[1] = (input[8] * input[6] - input[4] * input[10]) / det;
-        output[4] = (input[0] * input[10] - input[8] * input[2]) / det;
-        output[7] = (input[4] * input[2] - input[0] * input[6]) / det;
-        output[2] = (input[4] * input[9] - input[8] * input[5]) / det;
-        output[5] = (input[8] * input[1] - input[0] * input[9]) / det;
-        output[8] = (input[0] * input[5] - input[4] * input[1]) / det;
-    }
+
     static invertFromMatrix4(output, input) {
-		const det = input[0] * input[5] * input[10] - input[0] * input[9] * input[6] - input[4] * input[1] * input[10] + input[4] * input[9] * input[2] + input[8] * input[1] * input[6] - input[8] * input[5] * input[2];
-		output[0] = (input[5] * input[10] - input[9] * input[6]) / det;
-		output[1] = (input[9] * input[2] - input[1] * input[10]) / det;
-		output[2] = (input[1] * input[6] - input[5] * input[2]) / det;
-		output[3] = (input[8] * input[6] - input[4] * input[10]) / det;
-		output[4] = (input[0] * input[10] - input[8] * input[2]) / det;
-		output[5] = (input[4] * input[2] - input[0] * input[6]) / det;
-		output[6] = (input[4] * input[9] - input[8] * input[5]) / det;
-		output[7] = (input[8] * input[1] - input[0] * input[9]) / det;
-		output[8] = (input[0] * input[5] - input[4] * input[1]) / det;
-	}
-    
+        const det = (
+            input[0] * input[5] * input[10] -
+            input[0] * input[9] * input[6] -
+            input[4] * input[1] * input[10] +
+            input[4] * input[9] * input[2] +
+            input[8] * input[1] * input[6] -
+            input[8] * input[5] * input[2]
+        );
+
+        const invDet = 1.0 / det;
+
+        output[0] = (input[5] * input[10] - input[9] * input[6]) * invDet;
+        output[1] = (input[9] * input[2] - input[1] * input[10]) * invDet;
+        output[2] = (input[1] * input[6] - input[5] * input[2]) * invDet;
+        output[3] = (input[8] * input[6] - input[4] * input[10]) * invDet;
+        output[4] = (input[0] * input[10] - input[8] * input[2]) * invDet;
+        output[5] = (input[4] * input[2] - input[0] * input[6]) * invDet;
+        output[6] = (input[4] * input[9] - input[8] * input[5]) * invDet;
+        output[7] = (input[8] * input[1] - input[0] * input[9]) * invDet;
+        output[8] = (input[0] * input[5] - input[4] * input[1]) * invDet;
+    }
+
 }
 
 // Berechnungen in Column-Major-Order für 4x4 Matrizen

@@ -33,7 +33,6 @@ export class InputHandler {
 
 export function getGlContext(canvas) {
 	let gl = canvas.getContext("webgl");
-	//gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 	if (!gl) {
 		gl = canvas.getContext("experimental-webgl");
 		alert("your browser does not support WebGl");
