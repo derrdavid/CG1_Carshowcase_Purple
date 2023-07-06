@@ -13,7 +13,7 @@ varying vec3 fNormal;
 varying vec2 fTexCoord;
 
 void main() {
-   gl_Position = mProj * mView * mWorld * vec4(vPosition, 1.0);
+  gl_Position = mProj * mView * mWorld * vec4(vPosition, 1.0);
   fTexCoord = vTexCoord;
   fNormal = (mView * mWorld * vec4(vNormal, 0.0)).xyz;
   vec4 viewPos = mView * mWorld * vec4(vPosition, 1.0);

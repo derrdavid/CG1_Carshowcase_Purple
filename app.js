@@ -48,7 +48,7 @@ const loop = function () {
 	let matProjUniformLocation = gl.getUniformLocation(skybox.program, 'mProj');
 	let matViewUniformLocation = gl.getUniformLocation(skybox.program, 'mView');
 	let matWorldUniformLocation = gl.getUniformLocation(skybox.program, 'mWorld');
-	code4x4.lookAt(viewMatrix, [0, 0.5, 6], [0, 0, 0], [Math.sin(inputHandler.lerpedValue / 10), 1, 0]);
+	code4x4.lookAt(viewMatrix, [0, 0.5, 5], [0, 0, 0], [Math.sin(inputHandler.lerpedValue / 10), 1, 0]);
 	code4x4.rotate(viewMatrix, viewMatrix, speed / 8, [0, 1, 0]);
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
@@ -66,14 +66,17 @@ const loop = function () {
 	matViewUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mView');
 	matWorldUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mWorld');
 	let eyeDirUniformLocation = gl.getUniformLocation(carEnvMap.program, 'vEyeDir');
-
-	code4x4.translate(viewMatrix, viewMatrix, [-1.5, 0, 0]);
+	let useMaskUniformLocation = gl.getUniformLocation(carEnvMap.program, "useMask");
+	code4x4.translate(viewMatrix, viewMatrix, [0, 0, 0]);
 	code4x4.rotate(viewMatrix, viewMatrix, angle / 100, [0.0, 1.0, 0]);
+
 
 	const invViewMatrix = new Float32Array(9);
 	code3x3.invertFromMatrix4(invViewMatrix, viewMatrix);
 	const eyeDir = [0, 0, 1];
 	code3x1.multiplyMatrixVector(invViewMatrix, eyeDir);
+
+	gl.uniform1i(useMaskUniformLocation, true);
 	gl.uniform3fv(eyeDirUniformLocation, eyeDir);
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
