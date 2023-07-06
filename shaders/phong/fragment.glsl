@@ -5,7 +5,6 @@ struct Light {
   vec3 ambient;
 };
 struct Material {
-  vec3 emissive;
   vec3 ambient;
   vec3 diffuse;
   vec3 specular;
@@ -14,25 +13,23 @@ struct Material {
 
 uniform Light light;
 uniform Material mat;
+uniform sampler2D sampler;
 
 varying vec3 fPosition;
 varying vec3 fNormal;
 varying vec2 fTexCoord;
 
-uniform sampler2D sampler;
-
 void main() {
-  vec3 L = normalize(light.position - fPosition);
-  vec3 N = normalize(fNormal);
-  vec3 V = vec3(-0.5, 0.5, 0.0);
-
   vec4 texture = texture2D(sampler, fTexCoord);
-  if(length(texture.rgb) < 0.5) {
+  if(length(texture.rgb) >= 0.0) {
     discard;
   }
+  vec3 N = normalize(fNormal);
+  vec3 V = normalize(light.position - fPosition);
+  vec3 R = normalize(reflect(-light.position,N));
 
-  vec3 color = mat.ambient * light.ambient;
-  color += mat.diffuse * light.color * max(dot(N, L), 0.0);
-  color += mat.specular * light.color * pow(max(dot(reflect(-L, N), V), 0.0), mat.shininess);
-  gl_FragColor = vec4(color, 1.0) * texture;
+  vec3 fragColor = mat.ambient * light.ambient;
+  fragColor += mat.diffuse * light.color * max(dot(light.position, N), 0.0);
+  fragColor += mat.specular * light.color * pow(max(dot(N, R), 0.0), mat.shininess);
+  gl_FragColor = mix(vec4(fragColor,1.0), texture, 0.0);
 }

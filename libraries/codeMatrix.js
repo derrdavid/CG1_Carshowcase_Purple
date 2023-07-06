@@ -34,37 +34,6 @@ export class Code3x1 {
     }
 }
 
-/**
- *  Transforms a point vec3 with m3
- * @param vec3 Vektor3
- * @param m3 3x3 Matrix
- * @returns {[]} Transformed vec3
- */
-export function transform(vec3, m3) {
-    vec3[0] = m3[0] * vec3[0] + m3[3] * vec3[1] + m3[6] * vec3[2];
-    vec3[1] = m3[1] * vec3[0] + m3[4] * vec3[1] + m3[7] * vec3[2];
-    vec3[2] = m3[2] * vec3[0] + m3[5] * vec3[1] + m3[8] * vec3[2];
-}
-
-/**
- * calculate normal from 4x4 matrix
- * @param m4
- * @returns {[]}
- */
-export function normalFromMatrix4(m4) {
-    const determinant = this.determinant(m4);
-    m4[0] = (m4[5] * m4[10] - m4[9] * m4[6]) / determinant;
-    m4[3] = (m4[9] * m4[2] - m4[1] * m4[10]) / determinant;
-    m4[6] = (m4[1] * m4[6] - m4[5] * m4[2]) / determinant;
-    m4[1] = (m4[8] * m4[6] - m4[4] * m4[10]) / determinant;
-    m4[4] = (m4[0] * m4[10] - m4[8] * m4[2]) / determinant;
-    m4[7] = (m4[4] * m4[2] - m4[0] * m4[6]) / determinant;
-    m4[2] = (m4[4] * m4[9] - m4[8] * m4[5]) / determinant;
-    m4[5] = (m4[8] * m4[1] - m4[0] * m4[9]) / determinant;
-    m4[8] = (m4[0] * m4[5] - m4[4] * m4[1]) / determinant;
-}
-
-
 export class Code3x3 {
     determinant(input) {
         const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = input;
@@ -90,6 +59,31 @@ export class Code3x3 {
         output[8] = (m00 * m11 - m01 * m10) * invDet;
         return output;
     }
+    normalFromMatrix4(output, input) {
+		const det = input[0] * input[5] * input[10] - input[0] * input[9] * input[6] - input[4] * input[1] * input[10] + input[4] * input[9] * input[2] + input[8] * input[1] * input[6] - input[8] * input[5] * input[2];
+        output[0] = (input[5] * input[10] - input[9] * input[6]) / det;
+        output[3] = (input[9] * input[2] - input[1] * input[10]) / det;
+        output[6] = (input[1] * input[6] - input[5] * input[2]) / det;
+        output[1] = (input[8] * input[6] - input[4] * input[10]) / det;
+        output[4] = (input[0] * input[10] - input[8] * input[2]) / det;
+        output[7] = (input[4] * input[2] - input[0] * input[6]) / det;
+        output[2] = (input[4] * input[9] - input[8] * input[5]) / det;
+        output[5] = (input[8] * input[1] - input[0] * input[9]) / det;
+        output[8] = (input[0] * input[5] - input[4] * input[1]) / det;
+    }
+    invertFromMatrix4(output, input) {
+		const det = input[0] * input[5] * input[10] - input[0] * input[9] * input[6] - input[4] * input[1] * input[10] + input[4] * input[9] * input[2] + input[8] * input[1] * input[6] - input[8] * input[5] * input[2];
+		output[0] = (input[5] * input[10] - input[9] * input[6]) / det;
+		output[1] = (input[9] * input[2] - input[1] * input[10]) / det;
+		output[2] = (input[1] * input[6] - input[5] * input[2]) / det;
+		output[3] = (input[8] * input[6] - input[4] * input[10]) / det;
+		output[4] = (input[0] * input[10] - input[8] * input[2]) / det;
+		output[5] = (input[4] * input[2] - input[0] * input[6]) / det;
+		output[6] = (input[4] * input[9] - input[8] * input[5]) / det;
+		output[7] = (input[8] * input[1] - input[0] * input[9]) / det;
+		output[8] = (input[0] * input[5] - input[4] * input[1]) / det;
+	}
+    
 }
 
 // Berechnungen in Column-Major-Order für 4x4 Matrizen
