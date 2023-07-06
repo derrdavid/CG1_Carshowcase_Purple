@@ -1,21 +1,21 @@
 const EPSILON = 0.0001;
 
 export class Code3x1 {
-    subtractVectors(a, b) {
+    static subtractVectors(a, b) {
         return [
             a[0] - b[0],
             a[1] - b[1],
             a[2] - b[2]
         ];
     }
-    cross(a, b) {
+    static cross(a, b) {
         return [
             a[1] * b[2] - a[2] * b[1],
             a[2] * b[0] - a[0] * b[2],
             a[0] * b[1] - a[1] * b[0]
         ];
     }
-    normalize(v) {
+    static normalize(v) {
         const length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
         return [
             v[0] / length,
@@ -23,10 +23,10 @@ export class Code3x1 {
             v[2] / length
         ];
     }
-    dot(a, b) {
+    static dot(a, b) {
         return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
     }
-    multiplyMatrixVector(m, v) {
+    static multiplyMatrixVector(m, v) {
         const c = Float32Array.from(v);
         v[0] = m[0] * c[0] + m[3] * c[1] + m[6] * c[2];
         v[1] = m[1] * c[0] + m[4] * c[1] + m[7] * c[2];
@@ -35,7 +35,7 @@ export class Code3x1 {
 }
 
 export class Code3x3 {
-    determinant(input) {
+    static determinant(input) {
         const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = input;
         return (
             m00 * (m11 * m22 - m12 * m21) -
@@ -43,7 +43,7 @@ export class Code3x3 {
             m02 * (m10 * m21 - m11 * m20)
         );
     }
-    invert(output, input) {
+    static invert(output, input) {
         const [m00, m01, m02, m10, m11, m12, m20, m21, m22] = input;
         const det = this.determinant(input);
         const invDet = 1 / det;
@@ -59,7 +59,7 @@ export class Code3x3 {
         output[8] = (m00 * m11 - m01 * m10) * invDet;
         return output;
     }
-    normalFromMatrix4(output, input) {
+    static normalFromMatrix4(output, input) {
 		const det = input[0] * input[5] * input[10] - input[0] * input[9] * input[6] - input[4] * input[1] * input[10] + input[4] * input[9] * input[2] + input[8] * input[1] * input[6] - input[8] * input[5] * input[2];
         output[0] = (input[5] * input[10] - input[9] * input[6]) / det;
         output[3] = (input[9] * input[2] - input[1] * input[10]) / det;
@@ -71,7 +71,7 @@ export class Code3x3 {
         output[5] = (input[8] * input[1] - input[0] * input[9]) / det;
         output[8] = (input[0] * input[5] - input[4] * input[1]) / det;
     }
-    invertFromMatrix4(output, input) {
+    static invertFromMatrix4(output, input) {
 		const det = input[0] * input[5] * input[10] - input[0] * input[9] * input[6] - input[4] * input[1] * input[10] + input[4] * input[9] * input[2] + input[8] * input[1] * input[6] - input[8] * input[5] * input[2];
 		output[0] = (input[5] * input[10] - input[9] * input[6]) / det;
 		output[1] = (input[9] * input[2] - input[1] * input[10]) / det;
@@ -88,7 +88,7 @@ export class Code3x3 {
 
 // Berechnungen in Column-Major-Order für 4x4 Matrizen
 export class Code4x4 {
-    multiply(output, inputA, inputB) {
+    static multiply(output, inputA, inputB) {
         for (let i = 0; i < 4; i++) {
             const ai0 = inputA[i], ai1 = inputA[i + 4], ai2 = inputA[i + 8], ai3 = inputA[i + 12];
             output[i] = ai0 * inputB[0] + ai1 * inputB[1] + ai2 * inputB[2] + ai3 * inputB[3];
@@ -97,7 +97,7 @@ export class Code4x4 {
             output[i + 12] = ai0 * inputB[12] + ai1 * inputB[13] + ai2 * inputB[14] + ai3 * inputB[15];
         }
     }
-    transpose(input, output) {
+    static transpose(input, output) {
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
                 output[i * 4 + j] = input[j * 4 + i];
@@ -106,7 +106,7 @@ export class Code4x4 {
 
         return output;
     }
-    determinant(input) {
+    static determinant(input) {
         const [
             m00, m01, m02, m03,
             m10, m11, m12, m13,
@@ -122,7 +122,7 @@ export class Code4x4 {
 
         return det;
     }
-    identity(output) {
+    static identity(output) {
         output = new Float32Array([
             1, 0, 0, 0,
             0, 1, 0, 0,
@@ -131,7 +131,7 @@ export class Code4x4 {
         ]);
         return output;
     }
-    translate(output, input, v) {
+    static translate(output, input, v) {
         const [tx, ty, tz] = v;
         const translationMatrix = new Float32Array([
             1, 0, 0, 0,
@@ -142,7 +142,7 @@ export class Code4x4 {
         this.multiply(output, input, translationMatrix);
         return output;
     }
-    scale(output, input, v) {
+    static scale(output, input, v) {
         const [sx, sy, sz] = v;
         const scalingMatrix = new Float32Array([
             sx, 0, 0, 0,
@@ -153,7 +153,7 @@ export class Code4x4 {
         this.multiply(output, input, scalingMatrix);
         return output;
     }
-    rotate(output, input, rad, v) {
+    static rotate(output, input, rad, v) {
         let [rx, ry, rz] = v;
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
@@ -172,20 +172,19 @@ export class Code4x4 {
         this.multiply(output, input, rotationMatrix);
         return output;
     }
-    lookAt(output, eye, center, up) {
-        const code3x1 = new Code3x1();
-        const u = code3x1.normalize(code3x1.subtractVectors(eye, center));
-        const v = code3x1.normalize(code3x1.cross(up, u));
-        const n = code3x1.cross(u, v);
+    static lookAt(output, eye, center, up) {
+        const u = Code3x1.normalize(Code3x1.subtractVectors(eye, center));
+        const v = Code3x1.normalize(Code3x1.cross(up, u));
+        const n = Code3x1.cross(u, v);
         output.set([
             v[0], n[0], u[0], 0,
             v[1], n[1], u[1], 0,
             v[2], n[2], u[2], 0,
-            -code3x1.dot(v, eye), -code3x1.dot(n, eye), -code3x1.dot(u, eye), 1
+            -Code3x1.dot(v, eye), -Code3x1.dot(n, eye), -Code3x1.dot(u, eye), 1
         ]);
         return output;
     }
-    perspective(output, fovy, aspect, near, far) {
+    static perspective(output, fovy, aspect, near, far) {
         const f = 1.0 / Math.tan(fovy / 2);
         output.set([
             f / aspect, 0, 0, 0,
