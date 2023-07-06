@@ -4,8 +4,9 @@ David Derr - 1671753
 Erik Hinkelmanns -  1583861
 
 ## HowTo
-index.hmtl im Browser(FireFox,Chrome,Safari) öffnen.  
-Seite Hot-Reloaden, falls beim erstmaligen Laden keine Objekte angezeigt wird.
+Öffnen Sie die index.hmtl mit dem VSCode LiveServerPlugin.  
+**Disclaimer:**
+Seite Hot-Reloaden, falls beim erstmaligen Laden keine Objekte angezeigt werden.
 
 ## Quellen
 
