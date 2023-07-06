@@ -64,12 +64,12 @@ export async function parseOBJ(location) {
 			vn.push(data.map(parseFloat));
 		}
 		else if (type === 'f') {
-			for (let fp of data) {
+			data.forEach((fp) => {
 				let idx = fp.split('/').map((x) => { return parseInt(x) });
 				v[idx[0] - 1].forEach((x) => { buffer.push(x) });
 				vt[idx[1] - 1].forEach((x) => { buffer.push(x) });
 				vn[idx[2] - 1].forEach((x) => { buffer.push(x) });
-			}
+			})
 		}
 	})
 	return buffer;
