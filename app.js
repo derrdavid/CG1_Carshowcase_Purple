@@ -88,6 +88,7 @@ const loop = function () {
 	matWorldUniformLocation = gl.getUniformLocation(tyres.program, 'mWorld');
 	eyeDirUniformLocation = gl.getUniformLocation(tyres.program, 'vEyeDir');
 
+	worldMatrix = code4x4.identity(worldMatrix);
 
 	gl.uniform3fv(eyeDirUniformLocation, eyeDir);
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
@@ -102,8 +103,6 @@ const loop = function () {
 	matProjUniformLocation = gl.getUniformLocation(carPaint.program, 'mProj');
 	matViewUniformLocation = gl.getUniformLocation(carPaint.program, 'mView');
 	matWorldUniformLocation = gl.getUniformLocation(carPaint.program, 'mWorld');
-
-	worldMatrix = code4x4.identity(worldMatrix);
 
 	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
 	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);

@@ -152,7 +152,7 @@ export async function createTyres(gl) {
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
 	let tyreTexture = gl.createTexture();
-	gl.activeTexture(gl.TEXTURE0 + 3);
+	gl.activeTexture(gl.TEXTURE0 + 4);
 	gl.bindTexture(gl.TEXTURE_2D, tyreTexture);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -169,9 +169,11 @@ export async function createTyres(gl) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
 
 		const textureSampler = gl.getUniformLocation(this.program, "textureSampler");
-		gl.uniform1i(textureSampler, 3);
+		gl.uniform1i(textureSampler, 4);
 		const maskSampler = gl.getUniformLocation(this.program, "maskSampler");
 		gl.uniform1i(maskSampler, 2);
+		const windowMaskSampler = gl.getUniformLocation(this.program, "windowMaskSampler");
+		gl.uniform1i(windowMaskSampler, 2);
 
 		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
 		gl.enableVertexAttribArray(texAttribLocation);
@@ -233,6 +235,15 @@ export async function createChromeBody(gl) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('bodyMask'));
 
+	let windowMask = gl.createTexture();
+	gl.activeTexture(gl.TEXTURE0 + 3);
+	gl.bindTexture(gl.TEXTURE_2D, windowMask);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('windowMask'));
+
 	chromeBody.vbo = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, chromeBody.vbo);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -241,10 +252,13 @@ export async function createChromeBody(gl) {
 	chromeBody.draw = function () {
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
 
-		const textureSampler = gl.getUniformLocation(this.program, "textureSampler");
-		gl.uniform1i(textureSampler, 1);
-		const maskSampler = gl.getUniformLocation(this.program, "maskSampler");
-		gl.uniform1i(maskSampler, 2);
+		const textureSamplerUniformLocation = gl.getUniformLocation(this.program, "textureSampler");
+		gl.uniform1i(textureSamplerUniformLocation, 1);
+		const maskSamplerUniformLocation = gl.getUniformLocation(this.program, "maskSampler");
+		gl.uniform1i(maskSamplerUniformLocation, 2);
+		const windowSamplerUniformLocation = gl.getUniformLocation(this.program, "windowMaskSampler");
+		gl.uniform1i(windowSamplerUniformLocation, 3);
+
 
 		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
 		gl.enableVertexAttribArray(texAttribLocation);
@@ -375,22 +389,19 @@ export async function createPhong(gl) {
 
 	carPaint.draw = function () {
 		const lightPositionUniformLocation = gl.getUniformLocation(carPaint.program, 'light.position');
-		gl.uniform3f(lightPositionUniformLocation, 1.0, 1.0, 0.0);
-
+		gl.uniform3f(lightPositionUniformLocation, -2.5, 3.0, -1.0);
 		const lightColorUniformLocation = gl.getUniformLocation(carPaint.program, 'light.color');
-		gl.uniform3f(lightColorUniformLocation, 0.5, 0.5, 0.5);
-
+		gl.uniform3f(lightColorUniformLocation, 1.0, 1.0, 1.0);
 		const lightAmbientUniformLocation = gl.getUniformLocation(carPaint.program, 'light.ambient');
-
 		gl.uniform3f(lightAmbientUniformLocation, 0.2, 0.2, 0.2);
 		const ambientUniformLocation = gl.getUniformLocation(this.program, 'mat.ambient');
-		gl.uniform3f(ambientUniformLocation, 0.0, 0.0, 1.0);
+		gl.uniform3f(ambientUniformLocation, 0.0, 0.05, 0.0);
 		const diffuseUniformLocation = gl.getUniformLocation(this.program, 'mat.diffuse');
-		gl.uniform3f(diffuseUniformLocation, 0.1, 0.5, 1.0);
+		gl.uniform3f(diffuseUniformLocation, 0.0, 0.05, 0.0);
 		const specularUniformLocation = gl.getUniformLocation(this.program, 'mat.specular');
 		gl.uniform3f(specularUniformLocation, 1.0, 1.0, 1.0);
 		const shininessUniformLocation = gl.getUniformLocation(this.program, 'mat.shininess');
-		gl.uniform1f(shininessUniformLocation, 2.0);
+		gl.uniform1f(shininessUniformLocation, 2);
 
 		const textureMask = gl.getUniformLocation(this.program, "sampler");
 		gl.uniform1i(textureMask, 0);

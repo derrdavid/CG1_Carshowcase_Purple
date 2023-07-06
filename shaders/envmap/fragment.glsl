@@ -3,16 +3,24 @@ precision mediump float;
 uniform samplerCube skybox;
 uniform sampler2D textureSampler;
 uniform sampler2D maskSampler;
+uniform sampler2D windowMaskSampler;
 
 varying vec3 fN;
 varying vec2 fTexCoord;
 varying vec3 fEyeDir;
+
 void main() {
   vec4 texture = texture2D(textureSampler, fTexCoord);
   vec4 mask = texture2D(maskSampler, fTexCoord);
+  vec4 windowMask = texture2D(windowMaskSampler, fTexCoord);
 
   float opacity = 0.7;
-  if(length(mask.rgb) <= 0.0) {
+
+  if(length(mask.rgb) >= 1.47) {
+    discard;
+  }
+
+  if(length(windowMask.rgb) <= 0.0) {
     opacity = 1.0;
   }
 
