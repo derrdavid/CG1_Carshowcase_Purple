@@ -1,5 +1,4 @@
-import { getGlContext, createShaderProgram, generateSkyboxTexture, createSkybox, createChromeBody, createPhong, InputHandler, createTyres } from "./libraries/utils.js";
-import { getSkyboxImages } from "./libraries/utils.js";
+import { getGlContext, createShaderProgram, createSkybox, createBodyChrome, createBodyPaint, InputHandler, createTyres } from "./libraries/utils.js";
 import { Code3x1, Code4x4, Code3x3 } from "./libraries/codeMatrix.js";
 // init Scene
 //
@@ -10,13 +9,13 @@ const inputHandler = new InputHandler(0.0, 0.5, 0.0005, 5.0);
 const skybox = await createSkybox(gl);
 skybox.program = await createShaderProgram(gl, './shaders/skybox/vertex.glsl', './shaders/skybox/fragment.glsl');
 
-const carEnvMap = await createChromeBody(gl, './assets/body.obj');
+const carEnvMap = await createBodyChrome(gl, './assets/body.obj');
 carEnvMap.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
 
 const tyres = await createTyres(gl, './assets/tyres.obj');
 tyres.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
 
-const carPaint = await createPhong(gl);
+const carPaint = await createBodyPaint(gl);
 carPaint.program = await createShaderProgram(gl, './shaders/phong/vertex.glsl', "./shaders/phong/fragment.glsl");
 
 // get Locations
