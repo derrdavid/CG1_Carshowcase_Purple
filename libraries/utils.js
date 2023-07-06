@@ -146,6 +146,69 @@ export async function generateSkyboxTexture(gl, imgArray) {
 
 	return texture;
 }
+export async function createTyres(gl) {
+	let tyres = {};
+	const vertices = await parseOBJ('./assets/tyres.obj');
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+	let tyreTexture = gl.createTexture();
+	gl.activeTexture(gl.TEXTURE0 + 3);
+	gl.bindTexture(gl.TEXTURE_2D, tyreTexture);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('tyreTexture'));
+
+	tyres.vbo = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, tyres.vbo);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+	tyres.draw = function () {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+
+		const textureSampler = gl.getUniformLocation(this.program, "textureSampler");
+		gl.uniform1i(textureSampler, 3);
+		const maskSampler = gl.getUniformLocation(this.program, "maskSampler");
+		gl.uniform1i(maskSampler, 2);
+
+		const texAttribLocation = gl.getAttribLocation(this.program, 'vTexCoord');
+		gl.enableVertexAttribArray(texAttribLocation);
+		gl.vertexAttribPointer(texAttribLocation, 2, gl.FLOAT, false, 8 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+
+		const positionAttribLocation = gl.getAttribLocation(this.program, 'vPosition');
+		gl.vertexAttribPointer(
+			positionAttribLocation,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			8 * Float32Array.BYTES_PER_ELEMENT,
+			0
+		);
+		gl.enableVertexAttribArray(positionAttribLocation);
+
+		const normalAttribLocation = gl.getAttribLocation(this.program, 'vNormal');
+		gl.vertexAttribPointer(
+			normalAttribLocation,
+			3,
+			gl.FLOAT,
+			gl.FALSE,
+			8 * Float32Array.BYTES_PER_ELEMENT,
+			5 * Float32Array.BYTES_PER_ELEMENT
+		);
+		gl.enableVertexAttribArray(normalAttribLocation);
+
+		gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 8);
+
+		gl.disableVertexAttribArray(positionAttribLocation);
+		gl.disableVertexAttribArray(normalAttribLocation);
+		gl.disableVertexAttribArray(texAttribLocation);
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+	}
+	return tyres;
+}
 
 export async function createChromeBody(gl) {
 	let chromeBody = {};

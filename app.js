@@ -1,4 +1,4 @@
-import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createChromeBody, createPhong, InputHandler } from "./libraries/utils.js";
+import { getGlContext, createShaderProgram, parseOBJ, generateSkyboxTexture, createSkybox, createChromeBody, createPhong, InputHandler, createTyres } from "./libraries/utils.js";
 import { getSkyboxImages } from "./libraries/utils.js";
 import { Code3x1, Code4x4, Code3x3 } from "./libraries/codeMatrix.js";
 // init Scene
@@ -15,8 +15,10 @@ skybox.texture = texture;
 skybox.program = await createShaderProgram(gl, './shaders/skybox/vertex.glsl', './shaders/skybox/fragment.glsl');
 
 const carEnvMap = await createChromeBody(gl);
-carEnvMap.texture = texture;
 carEnvMap.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
+
+const tyres = await createTyres(gl);
+tyres.program = await createShaderProgram(gl, './shaders/envmap/vertex.glsl', "./shaders/envmap/fragment.glsl");
 
 const carPaint = await createPhong(gl);
 carPaint.program = await createShaderProgram(gl, './shaders/phong/vertex.glsl', "./shaders/phong/fragment.glsl");
@@ -33,7 +35,6 @@ const projMatrix = new Float32Array(16);
 
 code4x4.perspective(projMatrix, 45 * Math.PI / 180, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
 gl.enable(gl.BLEND);
-gl.enable(gl.ALPHA_TEST);
 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 const loop = function () {
@@ -64,7 +65,7 @@ const loop = function () {
 	matProjUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mProj');
 	matViewUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mView');
 	matWorldUniformLocation = gl.getUniformLocation(carEnvMap.program, 'mWorld');
-	const eyeDirUniformLocation = gl.getUniformLocation(carEnvMap.program, 'vEyeDir');
+	let eyeDirUniformLocation = gl.getUniformLocation(carEnvMap.program, 'vEyeDir');
 
 	code4x4.translate(viewMatrix, viewMatrix, [-1.5, 0, 0]);
 	code4x4.rotate(viewMatrix, viewMatrix, angle / 100, [0.0, 1.0, 0]);
@@ -79,6 +80,21 @@ const loop = function () {
 	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
 
 	carEnvMap.draw();
+
+	gl.useProgram(tyres.program);
+
+	matProjUniformLocation = gl.getUniformLocation(tyres.program, 'mProj');
+	matViewUniformLocation = gl.getUniformLocation(tyres.program, 'mView');
+	matWorldUniformLocation = gl.getUniformLocation(tyres.program, 'mWorld');
+	eyeDirUniformLocation = gl.getUniformLocation(tyres.program, 'vEyeDir');
+
+
+	gl.uniform3fv(eyeDirUniformLocation, eyeDir);
+	gl.uniformMatrix4fv(matProjUniformLocation, gl.FALSE, projMatrix);
+	gl.uniformMatrix4fv(matViewUniformLocation, gl.FALSE, viewMatrix);
+	gl.uniformMatrix4fv(matWorldUniformLocation, gl.FALSE, worldMatrix);
+
+	tyres.draw();
 	// phong
 	//
 	gl.useProgram(carPaint.program);

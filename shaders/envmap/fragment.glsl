@@ -11,7 +11,7 @@ void main() {
   vec4 texture = texture2D(textureSampler, fTexCoord);
   vec4 mask = texture2D(maskSampler, fTexCoord);
 
-  float opacity = 0.5;
+  float opacity = 0.7;
   if(length(mask.rgb) <= 0.0) {
     opacity = 1.0;
   }
