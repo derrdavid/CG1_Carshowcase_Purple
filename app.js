@@ -24,6 +24,7 @@ bodyPaint.program = await createShaderProgram(gl, './shaders/phong/vertex.glsl',
 var worldMatrix = new Float32Array(16);
 var viewMatrix = new Float32Array(16);
 const projMatrix = new Float32Array(16);
+// ProjektionsTransformation (3D --> 2D)
 Code4x4.perspective(projMatrix, 45 * Math.PI / 180, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
 
 gl.enable(gl.BLEND);
@@ -32,9 +33,10 @@ gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 const loop = function () {
 	const angle = performance.now() / 1000;
 	const speed = inputHandler.lerpedValue * angle;
+
 	// skybox
 	//
-	gl.disable(gl.DEPTH_TEST);
+	gl.disable(gl.DEPTH_TEST); //unabhängig von anderen Objekten korrekt zeichen (ignore ZBuffer)
 	gl.useProgram(skybox.program);
 
 	let matProjUniformLocation = gl.getUniformLocation(skybox.program, 'mProj');
@@ -64,6 +66,8 @@ const loop = function () {
 
 	Code4x4.translate(viewMatrix, viewMatrix, [0, 0, 0]);
 	Code4x4.rotate(viewMatrix, viewMatrix, angle / 100, [0.0, 1.0, 0]);
+
+	// Blickrichtung in das WeltKoordinatensystem umrechnen, weil Skybox auch in Weltkoordinaten
 	const invViewMatrix = new Float32Array(9);
 	Code3x3.invertFrom4x4(invViewMatrix, viewMatrix);
 	const eyeDir = [0, 0, 1];

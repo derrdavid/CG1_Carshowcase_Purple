@@ -45,14 +45,14 @@ export async function parseOBJ(location) {
 	const txt = await response.text();
 	const lines = txt.split(/\r*\n/);
 
-	const v = [];
-	const vt = [];
-	const vn = [];
+	const v = []; //Vertex
+	const vt = []; //TexCoords
+	const vn = []; // Normals
 	const buffer = [];
 
 	lines.forEach((line) => {
 		let data = line.trim().split(/\s+/);
-		let type = data.shift();
+		let type = data.shift(); //entfernt das erste Element aus dem Array und returnt es (type "v")
 		if (type === "v") {
 			v.push(data.map(parseFloat));
 		}
@@ -64,11 +64,11 @@ export async function parseOBJ(location) {
 		}
 		else if (type === "f") {
 			for (let face of data) {
-				let indices = face.split("/").map((x) => {
+				let indices = face.split("/").map((x) => {	// für jedes Element in Int umwandeln
 					return parseInt(x);
 				});
 
-				let vertexIndices = indices[0] - 1;
+				let vertexIndices = indices[0] - 1; // Index fängt bei 0 an in JS und lines fangen bei 1 an (im OBJ)
 				let textureIndices = indices[1] - 1;
 				let normalIndices = indices[2] - 1;
 
@@ -134,11 +134,11 @@ export async function createShaderProgram(gl, vertexShaderPath, fragmentShaderPa
 
 function createTexture(gl, unit, elementID) {
 	let tyreTexture = gl.createTexture();
-	gl.activeTexture(gl.TEXTURE0 + unit);
+	gl.activeTexture(gl.TEXTURE0 + unit); //durchindizieren
 	gl.bindTexture(gl.TEXTURE_2D, tyreTexture);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); // TextureFiltering
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById(elementID));
 
@@ -240,7 +240,7 @@ export async function createSkybox(gl) {
 
 		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
-		gl.disableVertexAttribArray(positionAttribLocation);
+		gl.disableVertexAttribArray(positionAttribLocation); // alle freigeben für nächstes Objekt
 		gl.bindBuffer(gl.ARRAY_BUFFER, null);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 	}
@@ -339,11 +339,11 @@ export async function createBodyChrome(gl, OBJ_Path) {
 		const positionAttribLocation = gl.getAttribLocation(this.program, "vPosition");
 		gl.vertexAttribPointer(
 			positionAttribLocation,
-			3,
+			3, // 3 Elemente
 			gl.FLOAT,
 			gl.FALSE,
-			8 * Float32Array.BYTES_PER_ELEMENT,
-			0
+			8 * Float32Array.BYTES_PER_ELEMENT, // insgesamte Länge
+			0 // offset
 		);
 		gl.enableVertexAttribArray(positionAttribLocation);
 

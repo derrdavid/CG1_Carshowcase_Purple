@@ -14,7 +14,9 @@ varying vec2 fTexCoord;
 varying vec3 fEyeDir;
 
 void main() {
+  // übergebe an FragmentShader
   fEyeDir = vEyeDir;
+  // berechne OberflächenNormale
   fN = (mWorld * vec4(vNormal, 0.0)).xyz;
   gl_Position = mProj * mView * mWorld * vec4(vPosition, 1.0);
   fTexCoord = vTexCoord;
